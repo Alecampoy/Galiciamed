@@ -1,0 +1,177 @@
+---
+title: "Galiciamed Paper"
+output: html_document
+date: "2023-03-20"
+---
+```{r setup, include=FALSE}
+# Libraries
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library("ggpubr")
+library(rstatix)
+```
+
+
+
+# Galiciamed data analysis
+
+In this notebook I analyze the data out of the confocal images after analysis with the ImageJ Macro. The analysis is performed as followed:
+
+1. 
+
+
+
+
+
+# Carga de archivos y generación del dataset
+
+```{r, warning=FALSE}
+data_folder <- 'p:/CABD/Lab Manolo Muñoz/Ana Maria Brokate/Graficas Paper/datos'
+# Empty DF to save the measurements data and lists for the loaded elements
+medidas <- data.frame(matrix(ncol = 9, nrow = 0))
+colnames(medidas) <- c("Condition","Experimento", "Fecha", "Gusano", "Sum_vol", "Sum_Surface",
+                       "Sum_IntDen", "Media_Mean", "Media_StdDev")
+samples_list <- c()
+condiciones <- c()
+fechas <- c()
+# Generation of the data for each sample. Each sample's data is inside a folder, then each folder inside the data folder is processed
+
+sample_folders <- list.dirs(data_folder, recursive = FALSE)
+for (folder_temp in sample_folders){
+  # Extraction of the sample from the folder name
+  sample <- last(strsplit(temp_folder, '/')[[1]])
+  samples_list <- append(samples_list, sample)
+  # Extraction of the condition from the sample name via regex
+  condicion <- substring(sample, 1, regexpr("\\s-\\s", sample)-1)
+            if (!is.element(condicion, condiciones)){
+                condiciones <- append(condiciones, condicion)}
+            # La fecha de adquisición
+            fecha <- substring(muestra, regexpr("\\s-\\s", muestra)+3)
+            if (!is.element(fecha, fechas)){
+                fechas <- append(fechas, fecha)}
+            #print(folder)
+            # leemos los archivos de cada muestra
+            for (g in dir(temp_folder, pattern = "xls")) {
+              #print(g)
+                temp_File <- read.csv(paste(temp_folder, g, sep = "/"), header = TRUE, sep = "\t", dec = ".", fill = TRUE)[,c(1,2,3,6,7,8)]
+                # evita un error si se han manipulado los archivos xls
+                if (class(temp_File[[1]]) == "character") {
+                    #temp_File <- temp_File[-c(nrow(temp_File)-1,nrow(temp_File)),]
+                    temp_File <- as.data.frame(apply(temp_File, 2, function(x) as.numeric(x)))
+                    temp_File <- na.omit(temp_File)
+                    }
+                
+                temp_medidas <- tryCatch(data.frame(condicion, muestra, fecha, g,  sum(temp_File$Volume..nm.3.),
+                                           sum(temp_File$Surface..nm.2.), sum(temp_File$IntDen),
+                                           mean(temp_File$Mean), mean(temp_File$StdDev)), error = function(e) print(paste(folder,"--",g))) 
+                colnames(temp_medidas) <- colnames(medidas)
+                medidas <- rbind(medidas, temp_medidas)
+                
+            }}
+            print("fitino")
+```
+
+```{r}
+medidas <- medidas %>% mutate(Condition = as.factor(Condition), Fecha = as.factor(Fecha)) %>% mutate(Condition = relevel(Condition, ref = 'control'))
+```
+
+
+# Representación de los controles
+
+
+```{r fig.width=14}
+
+medidas %>%
+  filter(Condition == 'control') %>%
+  ggplot(aes(x = Fecha,y = Sum_IntDen, fill = as.factor(Fecha))) + 
+  geom_boxplot(width = 0.5, outlier.shape = NA) +
+  geom_jitter(aes(fill = as.factor(Fecha)), size = 1, alpha = 0.6, width = 0.18) +
+  labs(x = "Condition", y = "Integrated Density", title = "Comparison among controls adquired in different days") +
+  theme_bw(base_size = 12) +
+  theme(legend.position = "none") +
+  stat_compare_means(method = 'anova' ,label.y = 1.6e+07) +
+  stat_compare_means(
+    label = "p.signif",
+    method = "t.test",
+    ref.group = ".all.",
+    label.y = 1.55e+07
+  )
+
+```
+
+Se observa que los controles sufren variación del valor medio entre diferentes dias. Algunos dias, incluso cambia la varianza de modo extremo.
+
+# Representación de las condiciones mutantes respecto a la suma de los controles
+
+```{r fig.width=13}
+#unique(medidas$Condition)
+medidas %>%
+  filter() %>%
+  ggplot(aes(x = Condition,y = Sum_IntDen, fill = as.factor(Condition))) +
+  geom_boxplot(width = 0.5, outlier.shape = NA) +
+  geom_jitter(aes(fill = as.factor(Condition)), size = 1, alpha = 0.6, width = 0.2) +
+  labs(x = "Condition", y = "Integrated Density") +
+  theme_bw(base_size = 12) +
+  theme(legend.position = "none") +
+  stat_compare_means(method = 'anova' ,label.y = max(medidas$Sum_IntDen)*1.15) +
+  stat_compare_means(
+    label = "p.signif",
+    method = "t.test",
+    ref.group = "control",
+    label.y = max(medidas$Sum_IntDen)*1.05
+  )
+
+```
+Algunas condiciones resultan significativas respecto a todos los controles, aunque la distribución de controles la incluye -salvo asm-3-. Para evitar esto vamos a normalizar cada gusano con respecto a su control del dia.
+
+# Representación de las condiciones mutantes relativas a la media de expresion de los controles del dia.
+
+### Hallo el factor por el que se va a normalizar cada muestra de un dia y realizo la normalización.
+```{r}
+
+normalization_factor <-
+  medidas %>% filter(Condition == 'control') %>% group_by(Fecha) %>% summarise(
+    control_mean_Sum_vol = mean(Sum_vol),
+    control_median_Sum_vol = median(Sum_vol),
+    control_sd_Sum_vol = sd(Sum_vol),
+    control_mad_Sum_vol = mad(Sum_vol)
+  )
+```
+### Estandarizo los datos a el control del dia
+```{r}
+medidas <-
+  medidas %>% right_join(normalization_factor, by = "Fecha") %>% mutate(
+    norm_mean_Sum_vol = (Sum_vol - control_mean_Sum_vol)/control_sd_Sum_vol,
+    norm_median_Sum_vol = (Sum_vol - control_median_Sum_vol)/control_mad_Sum_vol
+  )
+```
+### Calculo de los one-sample t.test
+Quiero comprobar que cada una de las adquisiciones son de media diferente a cero mediante un one-sample t-test
+```{r}
+
+stat.test <- medidas %>%
+  filter(Condition != 'control') %>%
+  group_by(Condition, Fecha) %>%
+  t_test(norm_mean_Sum_vol ~ 1, mu = 0) %>% adjust_pvalue(method = "bonferroni") %>% add_significance("p.adj") %>%
+  add_xy_position(x = "Fecha") %>%
+  mutate(y.position = 16) 
+
+```
+
+```{r fig.width=14}
+stat.test$x <- c(0.9, 1.2, 1.7, 1.90, 2.1, 2.3, 2.8, 3.2, 3.8, 4, 4.2, 4.8, 5.2, 5.8, 6, 6.2, 6.8, 7, 7.2, 7.7, 7.9, 8.1, 8.3, 8.8, 9, 9.2, 9.8, 10, 10.2, 10.8, 11.2)
+
+medidas %>%
+  filter(Condition != 'control') %>%
+  ggplot(aes(x = Condition,y = norm_mean_Sum_vol, fill = Fecha)) +
+  geom_boxplot( outlier.shape = NA, width = 0.6) +
+  geom_point(position = position_jitterdodge(jitter.width = 0.8, dodge.width = 0.6), size =1, alpha=0.6) +
+  labs(x = "Condition", y = "Integrated Density", title = "Normalized change in expression with respect own control") +
+  theme_bw(base_size = 15) +
+  stat_pvalue_manual(stat.test, label = "p.adj.signif", x = "x", xmax=NULL)
+
+```
+
+
+
+
