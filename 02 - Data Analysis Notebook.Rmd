@@ -108,7 +108,7 @@ Fig.2 <- process_experiment(data_folder)
 ```
 
 
-```{r}
+```{r message=FALSE}
 
 Fig.2 %>% mutate(Sum_IntDen = Sum_IntDen/1e7) %>% 
   ggplot(aes(x = Condition,y = Sum_IntDen, fill = as.factor(Condition))) + 
@@ -125,8 +125,8 @@ Fig.2 %>% mutate(Sum_IntDen = Sum_IntDen/1e7) %>%
     label.y = 1.4
   )
 
-ggsave("output/Fig.2.png", device = 'png')
-ggsave("output/Fig.2.svg", device = 'svg')
+ggsave("Fig.2.png", device = 'png', path = 'output images/')
+ggsave("Fig.2.svg", device = 'svg', path = 'output images/')
 ```
 #OLD
 # Representación de las condiciones mutantes respecto a la suma de los controles
