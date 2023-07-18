@@ -121,7 +121,6 @@ every_file[!grepl("\\s-\\s", every_file)]
 ```{r, warning=FALSE}
 data_folder <- 'p:/CABD/Lab Manolo Muñoz/Ana Maria Brokate/datos paper Galiciamed/figura-2-smn-principal/'
 Fig.2 <- process_experiment(data_folder)
-# write_csv(Fig.2, "output data/Fig.2_data.csv")
 ```
 
 
@@ -142,8 +141,9 @@ Fig.2 %>% mutate(Sum_IntDen = Sum_IntDen/1e7) %>%
     label.y = 1.4
   )
 
-ggsave("Fig.2.png", device = 'png', path = 'output images/')
-ggsave("Fig.2.svg", device = 'svg', path = 'output images/')
+# ggsave("Fig.2.png", device = 'png', path = 'output images/')
+# ggsave("Fig.2.svg", device = 'svg', path = 'output images/')
+# write_csv(Fig.2, "output data/Fig.2_data.csv")
 ```
 
 
@@ -154,7 +154,6 @@ ggsave("Fig.2.svg", device = 'svg', path = 'output images/')
 ```{r, warning=FALSE}
 data_folder <- 'p:/CABD/Lab Manolo Muñoz/Ana Maria Brokate/datos paper Galiciamed/figure-3-11genes-principal/'
 Fig.3 <- process_experiment(data_folder)
-# write_csv(Fig.2, "output data/Fig.2_data.csv")
 ```
 
 ### Data Standarization
@@ -177,8 +176,6 @@ Fig.3 <-
 
 ```
 ### Statistical Test
-
-
 
 ```{r}
 
