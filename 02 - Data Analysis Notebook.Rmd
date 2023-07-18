@@ -14,21 +14,35 @@ setwd('d:/Github_repositories/Galiciamed/')
 
 
 
-# Galiciamed data analysis
+# Galiciamed Notebook Info
 
 In this notebook I analyze the data out of the confocal images after analysis with the ImageJ Macro. Every image from C.elegans has a .xls (.tsv) file with all objects detected via image analysis. Each of these objects represent *smn-1* expression in the worm. Interested magnitude is *Fluorescent Integrated Density*. In order to obtain a representative value for the worm, all Fluorescent Integrated Density is sum up, interpreting this value as the total expression of *smn-1* inside the region of interest.
 
-Data Storage:
+## Data Storage Structure
 
-- Every experiment is stored in an independent folder. Every condition of that experiment is stored i
+Every experiment is stored in an independent folder. Every condition of that experiment is stored in a subfolder
 
+## Data Processing
 
-# Data Structure
+The processing of the data is achieved as followed:
 
+1. A folder with all data to be ploted is selected
+2. From the path and name of every datafile in that folder, the sample, condition, date and worm number are extracted via Regex
+3. The total *Fluorescent Integrated Density* of the worm is sum up and inserted in a dataframe as new row
+
+The former is defined in a function ´process_experiment()´
+
+## Data Standarization
+
+The SMN-1 expression of the candidate genes in Fig.3 and Fig.4 is relative to its control. The control sample is acquired in the same day under same conditions. To plot the relative expression, each sample is standardized to its control sample via substracting the control mean and dividing by the control standard deviation.
+
+## Statistical Significance
+
+XXX
 
 # Folder Processing Function  
 
-The following function process the files from all c.elegans of an experiment generates a dataframe with the data.
+The following function process the files from all C.elegans of an experiment generates a dataframe with the data.
 
 ```{r, warning=TRUE}
 
@@ -100,14 +114,14 @@ every_file[!grepl("\\s-\\s", every_file)]
 ```
 
 
-# Generation of plots
+# Plots
 
 ## Fig.2
 
 ```{r, warning=FALSE}
 data_folder <- 'p:/CABD/Lab Manolo Muñoz/Ana Maria Brokate/datos paper Galiciamed/figura-2-smn-principal/'
 Fig.2 <- process_experiment(data_folder)
-write_csv(Fig.2, "output data/Fig.2_data.csv")
+# write_csv(Fig.2, "output data/Fig.2_data.csv")
 ```
 
 
@@ -131,51 +145,56 @@ Fig.2 %>% mutate(Sum_IntDen = Sum_IntDen/1e7) %>%
 ggsave("Fig.2.png", device = 'png', path = 'output images/')
 ggsave("Fig.2.svg", device = 'svg', path = 'output images/')
 ```
+
+
+
+
+## Fig.3
+
+```{r, warning=FALSE}
+data_folder <- 'p:/CABD/Lab Manolo Muñoz/Ana Maria Brokate/datos paper Galiciamed/figure-3-11genes-principal/'
+Fig.3 <- process_experiment(data_folder)
+# write_csv(Fig.2, "output data/Fig.2_data.csv")
+```
+
+### Data Standarization
+
+```{r}
+
+standarization_factors <-
+  Fig.3 %>% filter(Condition == 'control') %>% group_by(Date) %>% summarise(
+    control_mean_Sum_IntDen = mean(Sum_IntDen),
+    control_sd_Sum_IntDen = sd(Sum_IntDen),
+  )
+
+# Adding the Standarization factors to the Fig. dataset using the Date as reference. Afterwards, calculating the Standarized values
+
+Fig.3 <-
+  Fig.3 %>% right_join(standarization_factors, by = "Date") %>%
+  mutate(
+    stand_Sum_IntDen = (Sum_IntDen - control_mean_Sum_IntDen) / control_sd_Sum_IntDen
+    )
+
+```
+### Statistical Test
+
+
+
+```{r}
+
+stat.test <- Fig.3 %>%
+  filter(Condition != 'control') %>%
+  group_by(Condition, Date) %>%
+  t_test(stand_Sum_IntDen ~ 1, mu = 0) %>% adjust_pvalue(method = "bonferroni") %>% add_significance("p.adj") %>%
+  add_xy_position(x = "Date") %>%
+  mutate(y.position = 16) 
+
+```
+
+
 #OLD
-# Representación de las condiciones mutantes respecto a la suma de los controles
 
-```{r fig.width=13}
-#unique(medidas$Condition)
-medidas %>%
-  filter() %>%
-  ggplot(aes(x = Condition,y = Sum_IntDen, fill = as.factor(Condition))) +
-  geom_boxplot(width = 0.5, outlier.shape = NA) +
-  geom_jitter(aes(fill = as.factor(Condition)), size = 1, alpha = 0.6, width = 0.2) +
-  labs(x = "Condition", y = "Integrated Density") +
-  theme_bw(base_size = 12) +
-  theme(legend.position = "none") +
-  stat_compare_means(method = 'anova' ,label.y = max(medidas$Sum_IntDen)*1.15) +
-  stat_compare_means(
-    label = "p.signif",
-    method = "t.test",
-    ref.group = "control",
-    label.y = max(medidas$Sum_IntDen)*1.05
-  )
 
-```
-Algunas condiciones resultan significativas respecto a todos los controles, aunque la distribución de controles la incluye -salvo asm-3-. Para evitar esto vamos a normalizar cada gusano con respecto a su control del dia.
-
-# Representación de las condiciones mutantes relativas a la media de expresion de los controles del dia.
-
-### Hallo el factor por el que se va a normalizar cada muestra de un dia y realizo la normalización.
-```{r}
-
-normalization_factor <-
-  medidas %>% filter(Condition == 'control') %>% group_by(Fecha) %>% summarise(
-    control_mean_Sum_vol = mean(Sum_vol),
-    control_median_Sum_vol = median(Sum_vol),
-    control_sd_Sum_vol = sd(Sum_vol),
-    control_mad_Sum_vol = mad(Sum_vol)
-  )
-```
-### Estandarizo los datos a el control del dia
-```{r}
-medidas <-
-  medidas %>% right_join(normalization_factor, by = "Fecha") %>% mutate(
-    norm_mean_Sum_vol = (Sum_vol - control_mean_Sum_vol)/control_sd_Sum_vol,
-    norm_median_Sum_vol = (Sum_vol - control_median_Sum_vol)/control_mad_Sum_vol
-  )
-```
 ### Calculo de los one-sample t.test
 Quiero comprobar que cada una de las adquisiciones son de media diferente a cero mediante un one-sample t-test
 ```{r}
