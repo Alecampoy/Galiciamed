@@ -6,9 +6,9 @@ date: "2023-03-20"
 ```{r setup, include=FALSE}
 # Libraries
 knitr::opts_chunk$set(echo = TRUE)
-library(tidyverse)
+library("tidyverse")
 library("ggpubr")
-library(rstatix)
+library("rstatix")
 setwd('d:/Github_repositories/Galiciamed/')
 ```
 
@@ -16,9 +16,11 @@ setwd('d:/Github_repositories/Galiciamed/')
 
 # Galiciamed data analysis
 
-In this notebook I analyze the data out of the confocal images after analysis with the ImageJ Macro. The analysis is performed as followed:
+In this notebook I analyze the data out of the confocal images after analysis with the ImageJ Macro. Every image from C.elegans has a .xls (.tsv) file with all objects detected via image analysis. Each of these objects represent *smn-1* expression in the worm. Interested magnitude is *Fluorescent Integrated Density*. In order to obtain a representative value for the worm, all Fluorescent Integrated Density is sum up, interpreting this value as the total expression of *smn-1* inside the region of interest.
 
-1. 
+Data Storage:
+
+- Every experiment is stored in an independent folder. Every condition of that experiment is stored i
 
 
 # Data Structure
@@ -105,6 +107,7 @@ every_file[!grepl("\\s-\\s", every_file)]
 ```{r, warning=FALSE}
 data_folder <- 'p:/CABD/Lab Manolo Muñoz/Ana Maria Brokate/datos paper Galiciamed/figura-2-smn-principal/'
 Fig.2 <- process_experiment(data_folder)
+write_csv(Fig.2, "output data/Fig.2_data.csv")
 ```
 
 
