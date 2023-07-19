@@ -9,7 +9,8 @@ knitr::opts_chunk$set(echo = TRUE)
 library("tidyverse")
 library("ggpubr")
 library("rstatix")
-setwd('d:/Github_repositories/Galiciamed/')
+#setwd('d:/Github_repositories/Galiciamed/')
+setwd('C:/Users/Usuario/Documents/GitHub/Galiciamed')
 ```
 
 
@@ -32,7 +33,7 @@ The processing of the data is achieved as followed:
 
 The former is defined in a function ´process_experiment()´
 
-## Data Standarization
+## Data Standarization relative to control
 
 The SMN-1 expression of the candidate genes in Fig.3 and Fig.4 is relative to its control. The control sample is acquired in the same day under same conditions. To plot the relative expression, each sample is standardized to its control sample via substracting the control mean and dividing by the control standard deviation.
 
@@ -131,7 +132,7 @@ Fig.2 %>% mutate(Sum_IntDen = Sum_IntDen/1e7) %>%
   geom_boxplot(width = 0.5, outlier.shape = NA) +
   geom_jitter(aes(fill = as.factor(Condition)), size = 1.6, alpha = 0.7, width = 0.15) +
   scale_y_continuous(breaks=seq(0, 1.45, 0.25)) +
-  labs(x = "Condition", y = "Integrated Density (a.u)", title = "Fig.2 - Total Integrated density per C.elegans") +
+  labs(x = "Condition", y = "Total Fluorescent Integrated Density (a.u)", title = "Fig.2 - Total Fluorescent Integrated density per C.elegans") +
   theme_bw(base_size = 12) +
   theme(legend.position = 'none', panel.grid.minor = element_blank(), axis.text.x = element_text(size = 11, face = "italic")) +
   stat_compare_means(
@@ -141,13 +142,11 @@ Fig.2 %>% mutate(Sum_IntDen = Sum_IntDen/1e7) %>%
     label.y = 1.4
   )
 
+# to save plots and data
 # ggsave("Fig.2.png", device = 'png', path = 'output images/')
 # ggsave("Fig.2.svg", device = 'svg', path = 'output images/')
 # write_csv(Fig.2, "output data/Fig.2_data.csv")
 ```
-
-
-
 
 ## Fig.3
 
@@ -175,49 +174,125 @@ Fig.3 <-
     )
 
 ```
+
 ### Statistical Test
 
 ```{r}
 
-stat.test <- Fig.3 %>%
+stat.test_Fig.3 <- Fig.3 %>%
   filter(Condition != 'control') %>%
   group_by(Condition, Date) %>%
   t_test(stand_Sum_IntDen ~ 1, mu = 0) %>% adjust_pvalue(method = "bonferroni") %>% add_significance("p.adj") %>%
-  add_xy_position(x = "Date") %>%
-  mutate(y.position = 16) 
+  add_xy_position(x = "Condition") %>%
+  mutate(y.position = 15.5, x = x-1) # substract one to eliminate the position of the control group -not plotted.
+```
 
+It is interesting to check the Cohen's d effect size for the t-test, in order to account for the increase in expresion
+
+```{r}
+Fig.3 %>% group_by(Date) %>% cohens_d(Sum_IntDen ~ Condition, ref.group = 'control')
+```
+
+For our gen *asm-3* the magnitude is large, confirming the increase in expresion
+
+### Plot
+
+```{r fig.width=9}
+
+Fig.3 %>%
+  filter(Condition != 'control') %>%
+  ggplot(aes(x = Condition, y = stand_Sum_IntDen, fill = as.factor(Condition))) +
+  geom_boxplot( outlier.shape = NA, width = 0.5) +
+   geom_jitter(aes(fill = as.factor(Condition)), size = 1.6, alpha = 0.7, width = 0.15) +
+  labs(x = "Condition", y = "Relative change in Integrated Density", title = "Standarized change in Expression of SMN after RNAi treatment of the 11 candidate genes") +
+  theme_bw(base_size = 12) +
+  theme(legend.position = 'none', panel.grid.minor = element_blank(), axis.text.x = element_text(size = 11, face = "italic")) + 
+  stat_pvalue_manual(stat.test_Fig.3, label = "p.adj.signif", x = 'x')
+
+
+# to save plots and data
+# ggsave("Fig.3.png", device = 'png', path = 'output images/')
+# ggsave("Fig.3.svg", device = 'svg', path = 'output images/')
+# write_csv(Fig.3, "output data/Fig.3_data.csv")
 ```
 
 
-#OLD
 
 
-### Calculo de los one-sample t.test
-Quiero comprobar que cada una de las adquisiciones son de media diferente a cero mediante un one-sample t-test
+
+
+
+
+## Fig.3 Supl
+
+```{r, warning=FALSE}
+data_folder <- 'p:/CABD/Lab Manolo Muñoz/Ana Maria Brokate/datos paper Galiciamed/Figure-3-11genes-supl/'
+Fig.3_supl <- process_experiment(data_folder)
+```
+
+### Data Standarization
+
 ```{r}
 
-stat.test <- medidas %>%
-  filter(Condition != 'control') %>%
-  group_by(Condition, Fecha) %>%
-  t_test(norm_mean_Sum_vol ~ 1, mu = 0) %>% adjust_pvalue(method = "bonferroni") %>% add_significance("p.adj") %>%
-  add_xy_position(x = "Fecha") %>%
-  mutate(y.position = 16) 
+standarization_factors <-
+  Fig.3_supl %>% filter(Condition == 'control') %>% group_by(Date) %>% summarise(
+    control_mean_Sum_IntDen = mean(Sum_IntDen),
+    control_sd_Sum_IntDen = sd(Sum_IntDen),
+  )
+
+# Adding the Standarization factors to the Fig. dataset using the Date as reference. Afterwards, calculating the Standarized values
+
+Fig.3_supl <-
+  Fig.3_supl %>% right_join(standarization_factors, by = "Date") %>%
+  mutate(
+    stand_Sum_IntDen = (Sum_IntDen - control_mean_Sum_IntDen) / control_sd_Sum_IntDen
+    )
 
 ```
 
-```{r fig.width=14}
-stat.test$x <- c(0.9, 1.2, 1.7, 1.90, 2.1, 2.3, 2.8, 3.2, 3.8, 4, 4.2, 4.8, 5.2, 5.8, 6, 6.2, 6.8, 7, 7.2, 7.7, 7.9, 8.1, 8.3, 8.8, 9, 9.2, 9.8, 10, 10.2, 10.8, 11.2)
+### Statistical Test
 
-medidas %>%
+```{r}
+stat.test_Fig.3_supl <- Fig.3_supl %>%
   filter(Condition != 'control') %>%
-  ggplot(aes(x = Condition,y = norm_mean_Sum_vol, fill = Fecha)) +
-  geom_boxplot( outlier.shape = NA, width = 0.6) +
-  geom_point(position = position_jitterdodge(jitter.width = 0.8, dodge.width = 0.6), size =1, alpha=0.6) +
-  labs(x = "Condition", y = "Integrated Density", title = "Normalized change in expression with respect own control") +
-  theme_bw(base_size = 15) +
-  stat_pvalue_manual(stat.test, label = "p.adj.signif", x = "x", xmax=NULL)
-
+  group_by(Condition, Date) %>%
+  t_test(stand_Sum_IntDen ~ 1, mu = 0) %>% adjust_pvalue(method = "bonferroni") %>% add_significance("p.adj") %>%
+  add_xy_position(x = "Condition") %>%
+  mutate(y.position = 16, x = x-1) # substract one to eliminate the position of the control group -not plotted.
 ```
+
+It is interesting to check the Cohen's d effect size for the t-test, in order to account for the increase in expresion
+
+```{r}
+Fig.3_supl %>% group_by(Date) %>% cohens_d(Sum_IntDen ~ Condition, ref.group = 'control')
+```
+
+### Plot
+
+```{r fig.width=10}
+
+stat.test_Fig.3_supl$x <- c(1, 1.7,  2,  2.3,  3,  4,  5,  6,  7,  8,  9, 10, 11)
+
+Fig.3_supl %>%
+  filter(Condition != 'control') %>%
+  ggplot(aes(x = Condition, y = stand_Sum_IntDen, fill = as.factor(Date))) +
+  geom_boxplot( outlier.shape = NA, width = 0.5) +
+  geom_point(position = position_jitterdodge(jitter.width = 0.8, dodge.width = 0.5), size =1.2, alpha=0.7) +
+  # geom_jitter(aes(fill = as.factor(Date)), size = 1.6, alpha = 0.7, width = 0.15) +
+  labs(x = "Condition", y = "Relative change in Integrated Density", title = "Standarized change in Expression of SMN after RNAi treatment of the 11 candidate genes - Suplementary") +
+  theme_bw(base_size = 12) +
+  theme(legend.position = 'none', panel.grid.minor = element_blank(), axis.text.x = element_text(size = 11, face = "italic")) + 
+  stat_pvalue_manual(stat.test_Fig.3_supl, label = "p.adj.signif", x = 'x')
+
+# to save plots and data
+# ggsave("Fig.3_supl.png", device = 'png', path = 'output images/')
+# ggsave("Fig.3_supl.svg", device = 'svg', path = 'output images/')
+# write_csv(Fig.3_supl, "output data/Fig.3_supl_data.csv")
+```
+
+## Fig.4
+
+
 
 
 
