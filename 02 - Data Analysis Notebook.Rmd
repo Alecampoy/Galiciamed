@@ -159,7 +159,7 @@ Fig.3 <- process_experiment(data_folder)
 
 ```{r}
 
-standarization_factors <-
+standarization_factors_Fig.3 <-
   Fig.3 %>% filter(Condition == 'control') %>% group_by(Date) %>% summarise(
     control_mean_Sum_IntDen = mean(Sum_IntDen),
     control_sd_Sum_IntDen = sd(Sum_IntDen),
@@ -168,7 +168,7 @@ standarization_factors <-
 # Adding the Standarization factors to the Fig. dataset using the Date as reference. Afterwards, calculating the Standarized values
 
 Fig.3 <-
-  Fig.3 %>% right_join(standarization_factors, by = "Date") %>%
+  Fig.3 %>% right_join(standarization_factors_Fig.3, by = "Date") %>%
   mutate(
     stand_Sum_IntDen = (Sum_IntDen - control_mean_Sum_IntDen) / control_sd_Sum_IntDen
     )
@@ -208,7 +208,7 @@ Fig.3 %>%
   theme_bw(base_size = 12) +
   theme(legend.position = 'none', panel.grid.minor = element_blank(), axis.text.x = element_text(size = 11, face = "italic")) + 
   stat_pvalue_manual(stat.test_Fig.3, label = "p.adj.signif", x = 'x')
-
+# Note, the position of the significance simbols is in the stat.test DF
 
 # to save plots and data
 # ggsave("Fig.3.png", device = 'png', path = 'output images/')
@@ -223,7 +223,7 @@ Fig.3 %>%
 
 
 
-## Fig.3 Supl
+## Fig.3 Suplementary
 
 ```{r, warning=FALSE}
 data_folder <- 'p:/CABD/Lab Manolo Muñoz/Ana Maria Brokate/datos paper Galiciamed/Figure-3-11genes-supl/'
@@ -234,7 +234,7 @@ Fig.3_supl <- process_experiment(data_folder)
 
 ```{r}
 
-standarization_factors <-
+standarization_factors_Fig.3_supl <-
   Fig.3_supl %>% filter(Condition == 'control') %>% group_by(Date) %>% summarise(
     control_mean_Sum_IntDen = mean(Sum_IntDen),
     control_sd_Sum_IntDen = sd(Sum_IntDen),
@@ -243,7 +243,7 @@ standarization_factors <-
 # Adding the Standarization factors to the Fig. dataset using the Date as reference. Afterwards, calculating the Standarized values
 
 Fig.3_supl <-
-  Fig.3_supl %>% right_join(standarization_factors, by = "Date") %>%
+  Fig.3_supl %>% right_join(standarization_factors_Fig.3, by = "Date") %>%
   mutate(
     stand_Sum_IntDen = (Sum_IntDen - control_mean_Sum_IntDen) / control_sd_Sum_IntDen
     )
@@ -283,6 +283,7 @@ Fig.3_supl %>%
   theme_bw(base_size = 12) +
   theme(legend.position = 'none', panel.grid.minor = element_blank(), axis.text.x = element_text(size = 11, face = "italic")) + 
   stat_pvalue_manual(stat.test_Fig.3_supl, label = "p.adj.signif", x = 'x')
+# Note, the position of the significance simbols is in the stat.test DF
 
 # to save plots and data
 # ggsave("Fig.3_supl.png", device = 'png', path = 'output images/')
@@ -290,10 +291,130 @@ Fig.3_supl %>%
 # write_csv(Fig.3_supl, "output data/Fig.3_supl_data.csv")
 ```
 
-## Fig.4
+## Fig.4 A
 
 
+```{r, warning=FALSE}
+# Every command is in a single chunk for easinses
+data_folder <- 'p:/CABD/Lab Manolo Muñoz/Ana Maria Brokate/datos paper Galiciamed/figure-4A-clomipramine-gradiente-principal/'
+Fig.4A <- process_experiment(data_folder) %>%
+  mutate(Condition = factor(Condition, levels = c("control", "clomipramine-30", "clomipramine-60", "clomipramine-100", "clomipramine-120", "clomipramine-150",  "clomipramine-300")))
+```
 
 
+```{r, warning=FALSE, fig.width=10}
 
+### Data Standarization
+
+standarization_factors_Fig.4A <-
+  Fig.4A %>% filter(Condition == 'control') %>% group_by(Date) %>% summarise(
+    control_mean_Sum_IntDen = mean(Sum_IntDen),
+    control_sd_Sum_IntDen = sd(Sum_IntDen),
+  )
+
+# Adding the Standarization factors to the Fig. dataset using the Date as reference. Afterwards, calculating the Standarized values
+
+Fig.4A <-
+  Fig.4A %>% right_join(standarization_factors_Fig.4A, by = "Date") %>%
+  mutate(
+    stand_Sum_IntDen = (Sum_IntDen - control_mean_Sum_IntDen) / control_sd_Sum_IntDen
+    )
+
+### Statistical Test
+
+stat.test_Fig.4A <- Fig.4A %>%
+  filter(Condition != 'control') %>%
+  group_by(Condition, Date) %>%
+  t_test(stand_Sum_IntDen ~ 1, mu = 0) %>% adjust_pvalue(method = "bonferroni") %>% add_significance("p.adj") %>%
+  add_xy_position(x = "Condition") %>%
+  mutate(y.position = 15.5, x = x-1) # substract one to eliminate the position of the control group -not plotted.
+
+# Cohen's d
+
+# Fig.4A %>% group_by(Date) %>% cohens_d(Sum_IntDen ~ Condition, ref.group = 'control')
+
+### Plot
+
+Fig.4A %>%
+  filter(Condition != 'control') %>%
+  ggplot(aes(x = Condition, y = stand_Sum_IntDen, fill = Condition)) +
+  geom_boxplot( outlier.shape = NA, width = 0.5) +
+  geom_point(position = position_jitterdodge(jitter.width = 0.8, dodge.width = 0.5), size =1.2, alpha=0.7) +
+  # geom_jitter(aes(fill = as.factor(Date)), size = 1.6, alpha = 0.7, width = 0.15) +
+  labs(x = "Condition", y = "Relative change in Integrated Density", title = "Treatment with Clomipramine, Desipramine and Amlodipine increase the level of SMN.") +
+  theme_bw(base_size = 12) +
+  theme(legend.position = 'none', panel.grid.minor = element_blank(), axis.text.x = element_text(size = 11, face = "italic")) + 
+  stat_pvalue_manual(stat.test_Fig.4A, label = "p.adj.signif", x = 'x')
+# Note, the position of the significance simbols is in the stat.test DF
+
+# to save plots and data
+# ggsave("Fig.4.png", device = 'png', path = 'output images/')
+# ggsave("Fig.4.svg", device = 'svg', path = 'output images/')
+# write_csv(Fig.4, "output data/Fig.4_data.csv")
+```
+
+## Fig.4 A Suplementary
+
+
+```{r, warning=FALSE}
+# Every command is in a single chunk for easinses
+data_folder <- 'p:/CABD/Lab Manolo Muñoz/Ana Maria Brokate/datos paper Galiciamed/Figure-4A-clomipramine-supl/'
+Fig.4A_supl <- process_experiment(data_folder) %>%
+  mutate(Condition = factor(Sample))
+levels(Fig.4A_supl$Condition) <- c("clomipramine-100_rep1", "clomipramine-100_rep2", "clomipramine-100_rep3",
+"clomipramine-100_rep4",  "control", "control", "control", "control")  
+
+```
+
+
+```{r, warning=FALSE, fig.width=10}
+
+### Data Standarization
+
+standarization_factors_Fig.4A_supl <-
+  Fig.4A_supl %>% filter(Condition == 'control') %>% group_by(Date) %>% summarise(
+    control_mean_Sum_IntDen = mean(Sum_IntDen),
+    control_sd_Sum_IntDen = sd(Sum_IntDen),
+  )
+
+# Adding the Standarization factors to the Fig. dataset using the Date as reference. Afterwards, calculating the Standarized values
+
+Fig.4A_supl <-
+  Fig.4A_supl %>% right_join(standarization_factors_Fig.4A_supl, by = "Date") %>%
+  mutate(
+    stand_Sum_IntDen = (Sum_IntDen - control_mean_Sum_IntDen) / control_sd_Sum_IntDen
+    )
+
+### Statistical Test
+
+stat.test_Fig.4A_supl <- Fig.4A_supl %>%
+  filter(Condition != 'control') %>%
+  group_by(Condition, Date) %>%
+  t_test(stand_Sum_IntDen ~ 1, mu = 0) %>% adjust_pvalue(method = "bonferroni") %>% add_significance("p.adj") %>%
+  add_xy_position(x = "Condition") %>%
+  mutate(y.position = 10.5, x = x) # substract one to eliminate the position of the control group -not plotted.
+
+# Cohen's d
+
+# Fig.4A_supl %>% group_by(Date) %>% cohens_d(Sum_IntDen ~ Condition, ref.group = 'control')
+
+### Plot
+
+Fig.4A_supl %>%
+  filter(Condition != 'control') %>%
+  ggplot(aes(x = Condition, y = stand_Sum_IntDen, fill = Date)) +
+  geom_boxplot( outlier.shape = NA, width = 0.5) +
+  geom_point(position = position_jitterdodge(jitter.width = 0.8, dodge.width = 0.5), size =1.2, alpha=0.7) +
+  # geom_jitter(aes(fill = as.factor(Date)), size = 1.6, alpha = 0.7, width = 0.15) +
+  labs(x = "Condition", y = "Relative change in Integrated Density", title = "Treatment with Clomipramine, Desipramine and Amlodipine increase the level of SMN - Suplementary") +
+  theme_bw(base_size = 12) +
+  theme(legend.position = 'none', panel.grid.minor = element_blank(), axis.text.x = element_text(size = 11, face = "italic")) + 
+  stat_pvalue_manual(stat.test_Fig.4A_supl, label = "p.adj.signif", x = 'x')
+# Note, the position of the significance simbols is in the stat.test DF
+
+# to save plots and data
+# ggsave("Fig.4_supl.png", device = 'png', path = 'output images/')
+# ggsave("Fig.4_supl.svg", device = 'svg', path = 'output images/')
+# write_csv(Fig.4_supl, "output data/Fig.4_supl_data.csv")
+```
 
