@@ -728,8 +728,7 @@ Fig.5_supl %>%
   labs(x = "Condition", y = "Relative change in Integrated Density", title = "Fig.5 - Suplementary: SMN expression after treatment in adult stage") +
   theme_bw(base_size = 12) +
   theme(legend.position = 'none', panel.grid.minor = element_blank(), axis.text.x = element_text(size = 11, face = "italic")) + 
-  stat_pvalue_man
-ual(stat.test_Fig.5_supl, label = "p.adj.signif", x = 'x')
+  stat_pvalue_manual(stat.test_Fig.5_supl, label = "p.adj.signif", x = 'x')
 # Note, the position of the significance simbols is in the stat.test DF
 
 # to save plots and data
@@ -799,4 +798,4 @@ ggsave("Fig.6_supl.svg", device = 'svg', path = 'output images/')
 write_csv(Fig.6_supl, "output data/Fig.6_supl_data.csv")
 ```
 
-
+Fin
