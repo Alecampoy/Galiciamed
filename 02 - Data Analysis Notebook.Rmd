@@ -9,8 +9,9 @@ knitr::opts_chunk$set(echo = TRUE)
 library("tidyverse")
 library("ggpubr")
 library("rstatix")
-#setwd('d:/Github_repositories/Galiciamed/')
-setwd('C:/Users/Usuario/Documents/GitHub/Galiciamed')
+# setwd('d:/Github_repositories/Galiciamed/')
+# setwd('C:/Users/Usuario/Documents/GitHub/Galiciamed')
+setwd('/home/ale/Documentos/GitHub/Galiciamed/')
 ```
 
 
@@ -21,7 +22,7 @@ In this notebook I analyze the data out of the confocal images after analysis wi
 
 ## Data Storage Structure
 
-Every experiment is stored in an independent folder. Every condition of that experiment is stored in a subfolder
+Every experiment is stored in an independent folder. Every condition of that experiment is stored in a subfolder with name structure *CONDITION - DATE*. Note that all control folders have been renamed to *control - date*
 
 ## Data Processing
 
@@ -39,7 +40,9 @@ The SMN-1 expression of the candidate genes in Fig.3 and Fig.4 is relative to it
 
 ## Statistical Significance
 
-XXX
+For Fig.2 a single two-sample t-test between populations is applied.
+  
+To test statistically the candidate genes, since they are standarized to its own control, a one-sample t-test is performed with Null Hypothesis: candidate gene mean expression is equal to zero and Alternative Hypothesis: The mean is *greater* than zero. The p-values are *Bonferroni* corrected, see https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6099145/ 
 
 # Folder Processing Function  
 
@@ -110,7 +113,8 @@ process_experiment <- function(data_folder){
 
 ## Check that every folder has the proper name structure
 ```{r}
-every_file <- dir('p:/CABD/Lab Manolo Muñoz/Ana Maria Brokate/datos paper Galiciamed/', recursive = TRUE, include.dirs = FALSE)
+# every_file <- dir('p:/CABD/Lab Manolo Muñoz/Ana Maria Brokate/datos paper Galiciamed/', recursive = TRUE, include.dirs = FALSE)
+every_file <- dir('/home/ale/pCloudDrive/CABD/Lab Manolo Muñoz/Ana Maria Brokate/datos paper Galiciamed/', recursive = TRUE, include.dirs = FALSE)
 every_file[!grepl("\\s-\\s", every_file)]
 ```
 
@@ -120,7 +124,8 @@ every_file[!grepl("\\s-\\s", every_file)]
 ## Fig.2
 
 ```{r, warning=FALSE}
-data_folder <- 'p:/CABD/Lab Manolo Muñoz/Ana Maria Brokate/datos paper Galiciamed/figura-2-smn-principal/'
+# data_folder <- 'p:/CABD/Lab Manolo Muñoz/Ana Maria Brokate/datos paper Galiciamed/figura-2-smn-principal/'
+data_folder <- '/home/ale/pCloudDrive/CABD/Lab Manolo Muñoz/Ana Maria Brokate/datos paper Galiciamed/figura-2-smn-principal/'
 Fig.2 <- process_experiment(data_folder)
 ```
 
@@ -151,7 +156,8 @@ Fig.2 %>% mutate(Sum_IntDen = Sum_IntDen/1e7) %>%
 ## Fig.3
 
 ```{r, warning=FALSE}
-data_folder <- 'p:/CABD/Lab Manolo Muñoz/Ana Maria Brokate/datos paper Galiciamed/figure-3-11genes-principal/'
+# data_folder <- 'p:/CABD/Lab Manolo Muñoz/Ana Maria Brokate/datos paper Galiciamed/figure-3-11genes-principal/'
+data_folder <- '/home/ale/pCloudDrive/CABD/Lab Manolo Muñoz/Ana Maria Brokate/datos paper Galiciamed/figure-3-11genes-principal/'
 Fig.3 <- process_experiment(data_folder)
 ```
 
@@ -180,11 +186,13 @@ Fig.3 <-
 ```{r}
 
 stat.test_Fig.3 <- Fig.3 %>%
-  filter(Condition != 'control') %>%
+  filter(Condition != 'control') %>% droplevels() %>% 
   group_by(Condition, Date) %>%
-  t_test(stand_Sum_IntDen ~ 1, mu = 0) %>% adjust_pvalue(method = "bonferroni") %>% add_significance("p.adj") %>%
+  t_test(stand_Sum_IntDen ~ 1, mu = 0, alternative = "greater") %>% adjust_pvalue(method = "bonferroni") %>% add_significance("p.adj") %>%
   add_xy_position(x = "Condition") %>%
-  mutate(y.position = 15.5, x = x-1) # substract one to eliminate the position of the control group -not plotted.
+  mutate(y.position = 15.5)
+stat.test_Fig.3
+
 ```
 
 It is interesting to check the Cohen's d effect size for the t-test, in order to account for the increase in expresion
@@ -200,7 +208,7 @@ For our gen *asm-3* the magnitude is large, confirming the increase in expresion
 ```{r fig.width=9}
 
 Fig.3 %>%
-  filter(Condition != 'control') %>%
+  filter(Condition != 'control') %>% droplevels() %>% 
   ggplot(aes(x = Condition, y = stand_Sum_IntDen, fill = as.factor(Condition))) +
   geom_boxplot( outlier.shape = NA, width = 0.5) +
    geom_jitter(aes(fill = as.factor(Condition)), size = 1.6, alpha = 0.7, width = 0.15) +
@@ -226,7 +234,8 @@ Fig.3 %>%
 ## Fig.3 Suplementary
 
 ```{r, warning=FALSE}
-data_folder <- 'p:/CABD/Lab Manolo Muñoz/Ana Maria Brokate/datos paper Galiciamed/Figure-3-11genes-supl/'
+# data_folder <- 'p:/CABD/Lab Manolo Muñoz/Ana Maria Brokate/datos paper Galiciamed/Figure-3-11genes-supl/'
+data_folder <- '/home/ale/pCloudDrive/CABD/Lab Manolo Muñoz/Ana Maria Brokate/datos paper Galiciamed/Figure-3-11genes-supl/'
 Fig.3_supl <- process_experiment(data_folder)
 ```
 
@@ -243,7 +252,7 @@ standarization_factors_Fig.3_supl <-
 # Adding the Standarization factors to the Fig. dataset using the Date as reference. Afterwards, calculating the Standarized values
 
 Fig.3_supl <-
-  Fig.3_supl %>% right_join(standarization_factors_Fig.3, by = "Date") %>%
+  Fig.3_supl %>% right_join(standarization_factors_Fig.3_supl, by = "Date") %>%
   mutate(
     stand_Sum_IntDen = (Sum_IntDen - control_mean_Sum_IntDen) / control_sd_Sum_IntDen
     )
@@ -254,11 +263,11 @@ Fig.3_supl <-
 
 ```{r}
 stat.test_Fig.3_supl <- Fig.3_supl %>%
-  filter(Condition != 'control') %>%
+  filter(Condition != 'control') %>% droplevels() %>% 
   group_by(Condition, Date) %>%
-  t_test(stand_Sum_IntDen ~ 1, mu = 0) %>% adjust_pvalue(method = "bonferroni") %>% add_significance("p.adj") %>%
+  t_test(stand_Sum_IntDen ~ 1, mu = 0, alternative = "greater") %>% adjust_pvalue(method = "bonferroni") %>% add_significance("p.adj") %>%
   add_xy_position(x = "Condition") %>%
-  mutate(y.position = 16, x = x-1) # substract one to eliminate the position of the control group -not plotted.
+  mutate(y.position = 16)
 ```
 
 It is interesting to check the Cohen's d effect size for the t-test, in order to account for the increase in expresion
@@ -293,16 +302,13 @@ Fig.3_supl %>%
 
 ## Fig.4 A
 
-
-```{r, warning=FALSE}
-# Every command is in a single chunk for easinses
-data_folder <- 'p:/CABD/Lab Manolo Muñoz/Ana Maria Brokate/datos paper Galiciamed/figure-4A-clomipramine-gradiente-principal/'
-Fig.4A <- process_experiment(data_folder) %>%
-  mutate(Condition = factor(Condition, levels = c("control", "clomipramine-30", "clomipramine-60", "clomipramine-100", "clomipramine-120", "clomipramine-150",  "clomipramine-300")))
-```
-
-
 ```{r, warning=FALSE, fig.width=10}
+# Every command is in a single chunk for easinses
+# data_folder <- 'p:/CABD/Lab Manolo Muñoz/Ana Maria Brokate/datos paper Galiciamed/figure-4A-clomipramine-gradiente-principal/'
+data_folder <- '/home/ale/pCloudDrive/CABD/Lab Manolo Muñoz/Ana Maria Brokate/datos paper Galiciamed/figure-4A-clomipramine-gradiente-principal/'
+Fig.4A <- process_experiment(data_folder) %>%
+  mutate(Condition = factor(Condition, levels = c("control", "clomipramine-30", "clomipramine-60", "clomipramine-100", "clomipramine-120", "clomipramine-150",  "clomipramine-300"))) # ordered factors
+
 
 ### Data Standarization
 
@@ -323,11 +329,11 @@ Fig.4A <-
 ### Statistical Test
 
 stat.test_Fig.4A <- Fig.4A %>%
-  filter(Condition != 'control') %>%
+  filter(Condition != 'control') %>% droplevels() %>% 
   group_by(Condition, Date) %>%
-  t_test(stand_Sum_IntDen ~ 1, mu = 0) %>% adjust_pvalue(method = "bonferroni") %>% add_significance("p.adj") %>%
+  t_test(stand_Sum_IntDen ~ 1, mu = 0,  alternative = "greater") %>% adjust_pvalue(method = "bonferroni") %>% add_significance("p.adj") %>%
   add_xy_position(x = "Condition") %>%
-  mutate(y.position = 15.5, x = x-1) # substract one to eliminate the position of the control group -not plotted.
+  mutate(y.position = 15.5)
 
 # Cohen's d
 
@@ -341,11 +347,11 @@ Fig.4A %>%
   geom_boxplot( outlier.shape = NA, width = 0.5) +
   geom_point(position = position_jitterdodge(jitter.width = 0.8, dodge.width = 0.5), size =1.2, alpha=0.7) +
   # geom_jitter(aes(fill = as.factor(Date)), size = 1.6, alpha = 0.7, width = 0.15) +
-  labs(x = "Condition", y = "Relative change in Integrated Density", title = "Treatment with Clomipramine, Desipramine and Amlodipine increase the level of SMN.") +
+  labs(x = "Condition", y = "Relative change in Integrated Density", title = "Treatment with Clomipramine increase the level of SMN.") +
   theme_bw(base_size = 12) +
   theme(legend.position = 'none', panel.grid.minor = element_blank(), axis.text.x = element_text(size = 11, face = "italic")) + 
   stat_pvalue_manual(stat.test_Fig.4A, label = "p.adj.signif", x = 'x')
-# Note, the position of the significance simbols is in the stat.test DF
+# Note, the position of the significance symbols is in the stat.test DF
 
 # to save plots and data
 # ggsave("Fig.4.png", device = 'png', path = 'output images/')
@@ -356,18 +362,15 @@ Fig.4A %>%
 ## Fig.4 A Suplementary
 
 
-```{r, warning=FALSE}
-# Every command is in a single chunk for easinses
-data_folder <- 'p:/CABD/Lab Manolo Muñoz/Ana Maria Brokate/datos paper Galiciamed/Figure-4A-clomipramine-supl/'
-Fig.4A_supl <- process_experiment(data_folder) %>%
-  mutate(Condition = factor(Sample))
-levels(Fig.4A_supl$Condition) <- c("clomipramine-100_rep1", "clomipramine-100_rep2", "clomipramine-100_rep3",
-"clomipramine-100_rep4",  "control", "control", "control", "control")  
-
-```
-
-
 ```{r, warning=FALSE, fig.width=10}
+# Every command is in a single chunk for easinses
+# data_folder <- 'p:/CABD/Lab Manolo Muñoz/Ana Maria Brokate/datos paper Galiciamed/Figure-4A-clomipramine-supl/'
+data_folder <- '/home/ale/pCloudDrive/CABD/Lab Manolo Muñoz/Ana Maria Brokate/datos paper Galiciamed/Figure-4A-clomipramine-supl/'
+Fig.4A_supl <- process_experiment(data_folder) %>%
+  mutate(Condition = factor(Sample)) # to use the sample repetition as the condition
+levels(Fig.4A_supl$Condition) <- c("clomipramine-100_rep1", "clomipramine-100_rep2", "clomipramine-100_rep3",
+"clomipramine-100_rep4",  "control", "control", "control", "control")  # changing the levels name and grouping the controls
+
 
 ### Data Standarization
 
@@ -388,11 +391,11 @@ Fig.4A_supl <-
 ### Statistical Test
 
 stat.test_Fig.4A_supl <- Fig.4A_supl %>%
-  filter(Condition != 'control') %>%
+  filter(Condition != 'control') %>% droplevels() %>% 
   group_by(Condition, Date) %>%
-  t_test(stand_Sum_IntDen ~ 1, mu = 0) %>% adjust_pvalue(method = "bonferroni") %>% add_significance("p.adj") %>%
+  t_test(stand_Sum_IntDen ~ 1, mu = 0, alternative = "greater") %>% adjust_pvalue(method = "bonferroni") %>% add_significance("p.adj") %>%
   add_xy_position(x = "Condition") %>%
-  mutate(y.position = 10.5, x = x) # substract one to eliminate the position of the control group -not plotted.
+  mutate(y.position = 12)
 
 # Cohen's d
 
@@ -406,7 +409,7 @@ Fig.4A_supl %>%
   geom_boxplot( outlier.shape = NA, width = 0.5) +
   geom_point(position = position_jitterdodge(jitter.width = 0.8, dodge.width = 0.5), size =1.2, alpha=0.7) +
   # geom_jitter(aes(fill = as.factor(Date)), size = 1.6, alpha = 0.7, width = 0.15) +
-  labs(x = "Condition", y = "Relative change in Integrated Density", title = "Treatment with Clomipramine, Desipramine and Amlodipine increase the level of SMN - Suplementary") +
+  labs(x = "Condition", y = "Relative change in Integrated Density", title = "Treatment with Clomipramine 100 uM - Suplementary") +
   theme_bw(base_size = 12) +
   theme(legend.position = 'none', panel.grid.minor = element_blank(), axis.text.x = element_text(size = 11, face = "italic")) + 
   stat_pvalue_manual(stat.test_Fig.4A_supl, label = "p.adj.signif", x = 'x')
@@ -418,3 +421,240 @@ Fig.4A_supl %>%
 # write_csv(Fig.4_supl, "output data/Fig.4_supl_data.csv")
 ```
 
+## Fig.4 B
+
+```{r, warning=FALSE, fig.width=10}
+# Every command is in a single chunk for easinses
+# data_folder <- 'p:/CABD/Lab Manolo Muñoz/Ana Maria Brokate/datos paper Galiciamed/figure-4A-clomipramine-gradiente-principal/'
+data_folder <- '/home/ale/pCloudDrive/CABD/Lab Manolo Muñoz/Ana Maria Brokate/datos paper Galiciamed/figure-4B-desipramine-gradiente-principal/'
+Fig.4B <- process_experiment(data_folder) %>%
+  mutate(Condition = factor(Condition, levels = c("control", "desipramine-15",  "desipramine-50",  "desipramine-250", "desipramine-400", "desipramine-500"))) # ordered factors
+
+
+### Data Standarization
+
+standarization_factors_Fig.4B <-
+  Fig.4B %>% filter(Condition == 'control') %>% group_by(Date) %>% summarise(
+    control_mean_Sum_IntDen = mean(Sum_IntDen),
+    control_sd_Sum_IntDen = sd(Sum_IntDen),
+  )
+
+# Adding the Standarization factors to the Fig. dataset using the Date as reference. Afterwards, calculating the Standarized values
+
+Fig.4B <-
+  Fig.4B %>% right_join(standarization_factors_Fig.4B, by = "Date") %>%
+  mutate(
+    stand_Sum_IntDen = (Sum_IntDen - control_mean_Sum_IntDen) / control_sd_Sum_IntDen
+    )
+
+### Statistical Test
+
+stat.test_Fig.4B <- Fig.4B %>%
+  filter(Condition != 'control') %>%
+  group_by(Condition, Date) %>%
+  t_test(stand_Sum_IntDen ~ 1, mu = 0,  alternative = "greater") %>% adjust_pvalue(method = "bonferroni") %>% add_significance("p.adj") %>%
+  add_xy_position(x = "Condition") %>%
+  mutate(y.position = 15.5, x = x-1) # substract one to eliminate the position of the control group -not plotted.
+
+# Cohen's d
+
+# Fig.4B %>% group_by(Date) %>% cohens_d(Sum_IntDen ~ Condition, ref.group = 'control')
+
+### Plot
+
+Fig.4B %>%
+  filter(Condition != 'control') %>%
+  ggplot(aes(x = Condition, y = stand_Sum_IntDen, fill = Condition)) +
+  geom_boxplot( outlier.shape = NA, width = 0.5) +
+  geom_point(position = position_jitterdodge(jitter.width = 0.8, dodge.width = 0.5), size =1.2, alpha=0.7) +
+  # geom_jitter(aes(fill = as.factor(Date)), size = 1.6, alpha = 0.7, width = 0.15) +
+  labs(x = "Condition", y = "Relative change in Integrated Density", title = "Treatment with Desipramine increase the level of SMN.") +
+  theme_bw(base_size = 12) +
+  theme(legend.position = 'none', panel.grid.minor = element_blank(), axis.text.x = element_text(size = 11, face = "italic")) + 
+  stat_pvalue_manual(stat.test_Fig.4B, label = "p.adj.signif", x = 'x')
+# Note, the position of the significance symbols is in the stat.test DF
+
+# to save plots and data
+# ggsave("Fig.4.png", device = 'png', path = 'output images/')
+# ggsave("Fig.4.svg", device = 'svg', path = 'output images/')
+# write_csv(Fig.4, "output data/Fig.4_data.csv")
+```
+
+## Fig.4 B Suplementary
+
+```{r, warning=FALSE, fig.width=10}
+# Every command is in a single chunk for easinses
+# data_folder <- 'p:/CABD/Lab Manolo Muñoz/Ana Maria Brokate/datos paper Galiciamed//'
+data_folder <- '/home/ale/pCloudDrive/CABD/Lab Manolo Muñoz/Ana Maria Brokate/datos paper Galiciamed/Figure-4B-desipramine-supl/'
+Fig.4B_supl <- process_experiment(data_folder) %>%
+  mutate(Condition = factor(Sample)) # to use the sample repetition as the condition
+levels(Fig.4B_supl$Condition) <- c("control", "control", "desipramine-400", "desipramine-500_rep1", "desipramine-500_rep2" )  # changing the levels name and grouping the controls
+
+
+### Data Standarization
+
+standarization_factors_Fig.4B_supl <-
+  Fig.4B_supl %>% filter(Condition == 'control') %>% group_by(Date) %>% summarise(
+    control_mean_Sum_IntDen = mean(Sum_IntDen),
+    control_sd_Sum_IntDen = sd(Sum_IntDen),
+  )
+
+# Adding the Standarization factors to the Fig. dataset using the Date as reference. Afterwards, calculating the Standarized values
+
+Fig.4B_supl <-
+  Fig.4B_supl %>% right_join(standarization_factors_Fig.4B_supl, by = "Date") %>%
+  mutate(
+    stand_Sum_IntDen = (Sum_IntDen - control_mean_Sum_IntDen) / control_sd_Sum_IntDen
+    )
+
+### Statistical Test
+
+stat.test_Fig.4B_supl <- Fig.4B_supl %>%
+  filter(Condition != 'control') %>%  droplevels() %>% 
+  group_by(Condition, Date) %>%
+  t_test(stand_Sum_IntDen ~ 1, mu = 0, alternative = "greater") %>% adjust_pvalue(method = "bonferroni") %>% add_significance("p.adj") %>%
+  add_xy_position(x = "Condition") %>%
+  mutate(y.position = 12.5) 
+
+# Cohen's d
+
+# Fig.4B_supl %>% group_by(Date) %>% cohens_d(Sum_IntDen ~ Condition, ref.group = 'control')
+
+### Plot
+
+Fig.4B_supl %>%
+  filter(Condition != 'control') %>% droplevels() %>% 
+  ggplot(aes(x = Condition, y = stand_Sum_IntDen, fill = Date)) +
+  geom_boxplot( outlier.shape = NA, width = 0.5) +
+  geom_point(position = position_jitterdodge(jitter.width = 0.8, dodge.width = 0.5), size =1.2, alpha=0.7) +
+  # geom_jitter(aes(fill = as.factor(Date)), size = 1.6, alpha = 0.7, width = 0.15) +
+  labs(x = "Condition", y = "Relative change in Integrated Density", title = "Treatment with Clomipramine 100 uM - Suplementary") +
+  theme_bw(base_size = 12) +
+  theme(legend.position = 'none', panel.grid.minor = element_blank(), axis.text.x = element_text(size = 11, face = "italic")) + 
+  stat_pvalue_manual(stat.test_Fig.4B_supl, label = "p.adj.signif", x = 'x')
+# Note, the position of the significance simbols is in the stat.test DF
+
+# to save plots and data
+# ggsave("Fig.4_supl.png", device = 'png', path = 'output images/')
+# ggsave("Fig.4_supl.svg", device = 'svg', path = 'output images/')
+# write_csv(Fig.4_supl, "output data/Fig.4_supl_data.csv")
+```
+
+## Fig.4 C
+
+```{r, warning=FALSE, fig.width=10}
+# Every command is in a single chunk for easinses
+# data_folder <- 'p:/CABD/Lab Manolo Muñoz/Ana Maria Brokate/datos paper Galiciamed/figl/'
+data_folder <- '/home/ale/pCloudDrive/CABD/Lab Manolo Muñoz/Ana Maria Brokate/datos paper Galiciamed//'
+Fig.4C <- process_experiment(data_folder) %>%
+  mutate(Condition = factor(Condition, levels = c("control", "desipramine-15",  "desipramine-50",  "desipramine-250", "desipramine-400", "desipramine-500"))) # ordered factors
+
+
+### Data Standarization
+
+standarization_factors_Fig.4C <-
+  Fig.4C %>% filter(Condition == 'control') %>% group_by(Date) %>% summarise(
+    control_mean_Sum_IntDen = mean(Sum_IntDen),
+    control_sd_Sum_IntDen = sd(Sum_IntDen),
+  )
+
+# Adding the Standarization factors to the Fig. dataset using the Date as reference. Afterwards, calculating the Standarized values
+
+Fig.4C <-
+  Fig.4C %>% right_join(standarization_factors_Fig.4C, by = "Date") %>%
+  mutate(
+    stand_Sum_IntDen = (Sum_IntDen - control_mean_Sum_IntDen) / control_sd_Sum_IntDen
+    )
+
+### Statistical Test
+
+stat.test_Fig.4C <- Fig.4C %>%
+  filter(Condition != 'control') %>%
+  group_by(Condition, Date) %>%
+  t_test(stand_Sum_IntDen ~ 1, mu = 0,  alternative = "greater") %>% adjust_pvalue(method = "bonferroni") %>% add_significance("p.adj") %>%
+  add_xy_position(x = "Condition") %>%
+  mutate(y.position = 15.5, x = x-1) # substract one to eliminate the position of the control group -not plotted.
+
+# Cohen's d
+
+# Fig.4C %>% group_by(Date) %>% cohens_d(Sum_IntDen ~ Condition, ref.group = 'control')
+
+### Plot
+
+Fig.4C %>%
+  filter(Condition != 'control') %>%
+  ggplot(aes(x = Condition, y = stand_Sum_IntDen, fill = Condition)) +
+  geom_boxplot( outlier.shape = NA, width = 0.5) +
+  geom_point(position = position_jitterdodge(jitter.width = 0.8, dodge.width = 0.5), size =1.2, alpha=0.7) +
+  # geom_jitter(aes(fill = as.factor(Date)), size = 1.6, alpha = 0.7, width = 0.15) +
+  labs(x = "Condition", y = "Relative change in Integrated Density", title = "Treatment with Desipramine increase the level of SMN.") +
+  theme_bw(base_size = 12) +
+  theme(legend.position = 'none', panel.grid.minor = element_blank(), axis.text.x = element_text(size = 11, face = "italic")) + 
+  stat_pvalue_manual(stat.test_Fig.4C, label = "p.adj.signif", x = 'x')
+# Note, the position of the significance symbols is in the stat.test DF
+
+# to save plots and data
+# ggsave("Fig.4.png", device = 'png', path = 'output images/')
+# ggsave("Fig.4.svg", device = 'svg', path = 'output images/')
+# write_csv(Fig.4, "output data/Fig.4_data.csv")
+```
+
+## Fig.4 C Suplementary
+
+```{r, warning=FALSE, fig.width=10}
+# Every command is in a single chunk for easinses
+# data_folder <- 'p:/CABD/Lab Manolo Muñoz/Ana Maria Brokate/datos paper Galiciamed//'
+data_folder <- '/home/ale/pCloudDrive/CABD/Lab Manolo Muñoz/Ana Maria Brokate/datos paper Galiciamed/Figure-4B-desipramine-supl/'
+Fig.4C_supl <- process_experiment(data_folder) %>%
+  mutate(Condition = factor(Sample)) # to use the sample repetition as the condition
+levels(Fig.4C_supl$Condition) <- c("control", "control", "desipramine-400", "desipramine-500_rep1", "desipramine-500_rep2" )  # changing the levels name and grouping the controls
+
+
+### Data Standarization
+
+standarization_factors_Fig.4C_supl <-
+  Fig.4C_supl %>% filter(Condition == 'control') %>% group_by(Date) %>% summarise(
+    control_mean_Sum_IntDen = mean(Sum_IntDen),
+    control_sd_Sum_IntDen = sd(Sum_IntDen),
+  )
+
+# Adding the Standarization factors to the Fig. dataset using the Date as reference. Afterwards, calculating the Standarized values
+
+Fig.4C_supl <-
+  Fig.4C_supl %>% right_join(standarization_factors_Fig.4C_supl, by = "Date") %>%
+  mutate(
+    stand_Sum_IntDen = (Sum_IntDen - control_mean_Sum_IntDen) / control_sd_Sum_IntDen
+    )
+
+### Statistical Test
+
+stat.test_Fig.4C_supl <- Fig.4C_supl %>%
+  filter(Condition != 'control') %>%  droplevels() %>% 
+  group_by(Condition, Date) %>%
+  t_test(stand_Sum_IntDen ~ 1, mu = 0, alternative = "greater") %>% adjust_pvalue(method = "bonferroni") %>% add_significance("p.adj") %>%
+  add_xy_position(x = "Condition") %>%
+  mutate(y.position = 12.5) 
+
+# Cohen's d
+
+# Fig.4C_supl %>% group_by(Date) %>% cohens_d(Sum_IntDen ~ Condition, ref.group = 'control')
+
+### Plot
+
+Fig.4C_supl %>%
+  filter(Condition != 'control') %>% droplevels() %>% 
+  ggplot(aes(x = Condition, y = stand_Sum_IntDen, fill = Date)) +
+  geom_boxplot( outlier.shape = NA, width = 0.5) +
+  geom_point(position = position_jitterdodge(jitter.width = 0.8, dodge.width = 0.5), size =1.2, alpha=0.7) +
+  # geom_jitter(aes(fill = as.factor(Date)), size = 1.6, alpha = 0.7, width = 0.15) +
+  labs(x = "Condition", y = "Relative change in Integrated Density", title = "Treatment with Clomipramine 100 uM - Suplementary") +
+  theme_bw(base_size = 12) +
+  theme(legend.position = 'none', panel.grid.minor = element_blank(), axis.text.x = element_text(size = 11, face = "italic")) + 
+  stat_pvalue_manual(stat.test_Fig.4C_supl, label = "p.adj.signif", x = 'x')
+# Note, the position of the significance simbols is in the stat.test DF
+
+# to save plots and data
+# ggsave("Fig.4_supl.png", device = 'png', path = 'output images/')
+# ggsave("Fig.4_supl.svg", device = 'svg', path = 'output images/')
+# write_csv(Fig.4_supl, "output data/Fig.4_supl_data.csv")
+```
