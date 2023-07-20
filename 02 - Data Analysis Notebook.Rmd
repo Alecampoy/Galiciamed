@@ -9,9 +9,9 @@ knitr::opts_chunk$set(echo = TRUE)
 library("tidyverse")
 library("ggpubr")
 library("rstatix")
-# setwd('d:/Github_repositories/Galiciamed/')
+setwd('d:/Github_repositories/Galiciamed/')
 # setwd('C:/Users/Usuario/Documents/GitHub/Galiciamed')
-setwd('/home/ale/Documentos/GitHub/Galiciamed/')
+
 ```
 
 
@@ -113,8 +113,7 @@ process_experiment <- function(data_folder){
 
 ## Check that every folder has the proper name structure
 ```{r}
-# every_file <- dir('p:/CABD/Lab Manolo Muñoz/Ana Maria Brokate/datos paper Galiciamed/', recursive = TRUE, include.dirs = FALSE)
-every_file <- dir('/home/ale/pCloudDrive/CABD/Lab Manolo Muñoz/Ana Maria Brokate/datos paper Galiciamed/', recursive = TRUE, include.dirs = FALSE)
+every_file <- dir('p:/CABD/Lab Manolo Muñoz/Ana Maria Brokate/datos paper Galiciamed/', recursive = TRUE, include.dirs = FALSE)
 every_file[!grepl("\\s-\\s", every_file)]
 ```
 
@@ -124,8 +123,7 @@ every_file[!grepl("\\s-\\s", every_file)]
 ## Fig.2
 
 ```{r, warning=FALSE}
-# data_folder <- 'p:/CABD/Lab Manolo Muñoz/Ana Maria Brokate/datos paper Galiciamed/figura-2-smn-principal/'
-data_folder <- '/home/ale/pCloudDrive/CABD/Lab Manolo Muñoz/Ana Maria Brokate/datos paper Galiciamed/figura-2-smn-principal/'
+data_folder <- 'p:/CABD/Lab Manolo Muñoz/Ana Maria Brokate/datos paper Galiciamed/figura-2-smn-principal/'
 Fig.2 <- process_experiment(data_folder)
 ```
 
@@ -148,16 +146,15 @@ Fig.2 %>% mutate(Sum_IntDen = Sum_IntDen/1e7) %>%
   )
 
 # to save plots and data
-# ggsave("Fig.2.png", device = 'png', path = 'output images/')
-# ggsave("Fig.2.svg", device = 'svg', path = 'output images/')
-# write_csv(Fig.2, "output data/Fig.2_data.csv")
+ggsave("Fig.2.png", device = 'png', path = 'output images/')
+ggsave("Fig.2.svg", device = 'svg', path = 'output images/')
+write_csv(Fig.2, "output data/Fig.2_data.csv")
 ```
 
 ## Fig.3
 
 ```{r, warning=FALSE}
-# data_folder <- 'p:/CABD/Lab Manolo Muñoz/Ana Maria Brokate/datos paper Galiciamed/figure-3-11genes-principal/'
-data_folder <- '/home/ale/pCloudDrive/CABD/Lab Manolo Muñoz/Ana Maria Brokate/datos paper Galiciamed/figure-3-11genes-principal/'
+data_folder <- 'p:/CABD/Lab Manolo Muñoz/Ana Maria Brokate/datos paper Galiciamed/figure-3-11genes-principal/'
 Fig.3 <- process_experiment(data_folder)
 ```
 
@@ -219,9 +216,9 @@ Fig.3 %>%
 # Note, the position of the significance simbols is in the stat.test DF
 
 # to save plots and data
-# ggsave("Fig.3.png", device = 'png', path = 'output images/')
-# ggsave("Fig.3.svg", device = 'svg', path = 'output images/')
-# write_csv(Fig.3, "output data/Fig.3_data.csv")
+ggsave("Fig.3.png", device = 'png', path = 'output images/')
+ggsave("Fig.3.svg", device = 'svg', path = 'output images/')
+write_csv(Fig.3, "output data/Fig.3_data.csv")
 ```
 
 
@@ -234,8 +231,7 @@ Fig.3 %>%
 ## Fig.3 Suplementary
 
 ```{r, warning=FALSE}
-# data_folder <- 'p:/CABD/Lab Manolo Muñoz/Ana Maria Brokate/datos paper Galiciamed/Figure-3-11genes-supl/'
-data_folder <- '/home/ale/pCloudDrive/CABD/Lab Manolo Muñoz/Ana Maria Brokate/datos paper Galiciamed/Figure-3-11genes-supl/'
+data_folder <- 'p:/CABD/Lab Manolo Muñoz/Ana Maria Brokate/datos paper Galiciamed/Figure-3-11genes-supl/'
 Fig.3_supl <- process_experiment(data_folder)
 ```
 
@@ -295,17 +291,16 @@ Fig.3_supl %>%
 # Note, the position of the significance simbols is in the stat.test DF
 
 # to save plots and data
-# ggsave("Fig.3_supl.png", device = 'png', path = 'output images/')
-# ggsave("Fig.3_supl.svg", device = 'svg', path = 'output images/')
-# write_csv(Fig.3_supl, "output data/Fig.3_supl_data.csv")
+ggsave("Fig.3_supl.png", device = 'png', path = 'output images/')
+ggsave("Fig.3_supl.svg", device = 'svg', path = 'output images/')
+write_csv(Fig.3_supl, "output data/Fig.3_supl_data.csv")
 ```
 
 ## Fig.4 A
 
 ```{r, warning=FALSE, fig.width=10}
-# Every command is in a single chunk for easinses
-# data_folder <- 'p:/CABD/Lab Manolo Muñoz/Ana Maria Brokate/datos paper Galiciamed/figure-4A-clomipramine-gradiente-principal/'
-data_folder <- '/home/ale/pCloudDrive/CABD/Lab Manolo Muñoz/Ana Maria Brokate/datos paper Galiciamed/figure-4A-clomipramine-gradiente-principal/'
+# Every command is in a single chunk for easiness
+data_folder <- 'p:/CABD/Lab Manolo Muñoz/Ana Maria Brokate/datos paper Galiciamed/figure-4A-clomipramine-gradiente-principal/'
 Fig.4A <- process_experiment(data_folder) %>%
   mutate(Condition = factor(Condition, levels = c("control", "clomipramine-30", "clomipramine-60", "clomipramine-100", "clomipramine-120", "clomipramine-150",  "clomipramine-300"))) # ordered factors
 
@@ -354,18 +349,17 @@ Fig.4A %>%
 # Note, the position of the significance symbols is in the stat.test DF
 
 # to save plots and data
-# ggsave("Fig.4.png", device = 'png', path = 'output images/')
-# ggsave("Fig.4.svg", device = 'svg', path = 'output images/')
-# write_csv(Fig.4, "output data/Fig.4_data.csv")
+ggsave("Fig.4A.png", device = 'png', path = 'output images/')
+ggsave("Fig.4A.svg", device = 'svg', path = 'output images/')
+write_csv(Fig.4A, "output data/Fig.4A_data.csv")
 ```
 
 ## Fig.4 A Suplementary
 
 
 ```{r, warning=FALSE, fig.width=10}
-# Every command is in a single chunk for easinses
-# data_folder <- 'p:/CABD/Lab Manolo Muñoz/Ana Maria Brokate/datos paper Galiciamed/Figure-4A-clomipramine-supl/'
-data_folder <- '/home/ale/pCloudDrive/CABD/Lab Manolo Muñoz/Ana Maria Brokate/datos paper Galiciamed/Figure-4A-clomipramine-supl/'
+# Every command is in a single chunk for easiness
+data_folder <- 'p:/CABD/Lab Manolo Muñoz/Ana Maria Brokate/datos paper Galiciamed/Figure-4A-clomipramine-supl/'
 Fig.4A_supl <- process_experiment(data_folder) %>%
   mutate(Condition = factor(Sample)) # to use the sample repetition as the condition
 levels(Fig.4A_supl$Condition) <- c("clomipramine-100_rep1", "clomipramine-100_rep2", "clomipramine-100_rep3",
@@ -416,17 +410,16 @@ Fig.4A_supl %>%
 # Note, the position of the significance simbols is in the stat.test DF
 
 # to save plots and data
-# ggsave("Fig.4_supl.png", device = 'png', path = 'output images/')
-# ggsave("Fig.4_supl.svg", device = 'svg', path = 'output images/')
-# write_csv(Fig.4_supl, "output data/Fig.4_supl_data.csv")
+ggsave("Fig.4A_supl.png", device = 'png', path = 'output images/')
+ggsave("Fig.4A_supl.svg", device = 'svg', path = 'output images/')
+write_csv(Fig.4A_supl, "output data/Fig.4A_supl_data.csv")
 ```
 
 ## Fig.4 B
 
 ```{r, warning=FALSE, fig.width=10}
-# Every command is in a single chunk for easinses
-# data_folder <- 'p:/CABD/Lab Manolo Muñoz/Ana Maria Brokate/datos paper Galiciamed/figure-4A-clomipramine-gradiente-principal/'
-data_folder <- '/home/ale/pCloudDrive/CABD/Lab Manolo Muñoz/Ana Maria Brokate/datos paper Galiciamed/figure-4B-desipramine-gradiente-principal/'
+# Every command is in a single chunk for easiness
+data_folder <- 'p:/CABD/Lab Manolo Muñoz/Ana Maria Brokate/datos paper Galiciamed/figure-4B-desipramine-gradiente-principal/'
 Fig.4B <- process_experiment(data_folder) %>%
   mutate(Condition = factor(Condition, levels = c("control", "desipramine-15",  "desipramine-50",  "desipramine-250", "desipramine-400", "desipramine-500"))) # ordered factors
 
@@ -475,17 +468,16 @@ Fig.4B %>%
 # Note, the position of the significance symbols is in the stat.test DF
 
 # to save plots and data
-# ggsave("Fig.4.png", device = 'png', path = 'output images/')
-# ggsave("Fig.4.svg", device = 'svg', path = 'output images/')
-# write_csv(Fig.4, "output data/Fig.4_data.csv")
+ggsave("Fig.4B.png", device = 'png', path = 'output images/')
+ggsave("Fig.4B.svg", device = 'svg', path = 'output images/')
+write_csv(Fig.4B, "output data/Fig.4B_data.csv")
 ```
 
 ## Fig.4 B Suplementary
 
 ```{r, warning=FALSE, fig.width=10}
 # Every command is in a single chunk for easinses
-# data_folder <- 'p:/CABD/Lab Manolo Muñoz/Ana Maria Brokate/datos paper Galiciamed//'
-data_folder <- '/home/ale/pCloudDrive/CABD/Lab Manolo Muñoz/Ana Maria Brokate/datos paper Galiciamed/Figure-4B-desipramine-supl/'
+data_folder <- 'p:/CABD/Lab Manolo Muñoz/Ana Maria Brokate/datos paper Galiciamed/Figure-4B-desipramine-supl/'
 Fig.4B_supl <- process_experiment(data_folder) %>%
   mutate(Condition = factor(Sample)) # to use the sample repetition as the condition
 levels(Fig.4B_supl$Condition) <- c("control", "control", "desipramine-400", "desipramine-500_rep1", "desipramine-500_rep2" )  # changing the levels name and grouping the controls
@@ -532,20 +524,19 @@ Fig.4B_supl %>%
   theme_bw(base_size = 12) +
   theme(legend.position = 'none', panel.grid.minor = element_blank(), axis.text.x = element_text(size = 11, face = "italic")) + 
   stat_pvalue_manual(stat.test_Fig.4B_supl, label = "p.adj.signif", x = 'x')
-# Note, the position of the significance simbols is in the stat.test DF
+# Note, the position of the significance symbols is in the stat.test DF
 
 # to save plots and data
-# ggsave("Fig.4_supl.png", device = 'png', path = 'output images/')
-# ggsave("Fig.4_supl.svg", device = 'svg', path = 'output images/')
-# write_csv(Fig.4_supl, "output data/Fig.4_supl_data.csv")
+ggsave("Fig.4B_supl.png", device = 'png', path = 'output images/')
+ggsave("Fig.4B_supl.svg", device = 'svg', path = 'output images/')
+write_csv(Fig.4B_supl, "output data/Fig.4B_supl_data.csv")
 ```
 
 ## Fig.4 C
 
 ```{r, warning=FALSE, fig.width=10}
 # Every command is in a single chunk for easinses
-# data_folder <- 'p:/CABD/Lab Manolo Muñoz/Ana Maria Brokate/datos paper Galiciamed/figl/'
-data_folder <- '/home/ale/pCloudDrive/CABD/Lab Manolo Muñoz/Ana Maria Brokate/datos paper Galiciamed/figure-4C-amlodipine-gradiente-principal/'
+data_folder <- 'p:/CABD/Lab Manolo Muñoz/Ana Maria Brokate/datos paper Galiciamed/figure-4C-amlodipine-gradiente-principal/'
 Fig.4C <- process_experiment(data_folder) %>%
   mutate(Condition = factor(Condition, levels = c("control", "amlodipine-25", "amlodipine-100"))) # ordered factors
 
@@ -593,21 +584,19 @@ Fig.4C %>%
 # Note, the position of the significance symbols is in the stat.test DF
 
 # to save plots and data
-# ggsave("Fig.4.png", device = 'png', path = 'output images/')
-# ggsave("Fig.4.svg", device = 'svg', path = 'output images/')
-# write_csv(Fig.4, "output data/Fig.4_data.csv")
+ggsave("Fig.4C.png", device = 'png', path = 'output images/')
+ggsave("Fig.4.Csvg", device = 'svg', path = 'output images/')
+write_csv(Fig.4C, "output data/Fig.4C_data.csv")
 ```
 
 ## Fig.4 C Suplementary
 
 ```{r, warning=FALSE, fig.width=10}
-# Every command is in a single chunk for easinses
-# data_folder <- 'p:/CABD/Lab Manolo Muñoz/Ana Maria Brokate/datos paper Galiciamed//'
-data_folder <- '/home/ale/pCloudDrive/CABD/Lab Manolo Muñoz/Ana Maria Brokate/datos paper Galiciamed/Figure-4C-amlodipine-supl/'
+# Every command is in a single chunk for easiness
+data_folder <- 'p:/CABD/Lab Manolo Muñoz/Ana Maria Brokate/datos paper Galiciamed/Figure-4C-amlodipine-supl/'
 Fig.4C_supl <- process_experiment(data_folder) %>%
   mutate(Condition = factor(Sample)) # to use the sample repetition as the condition
 levels(Fig.4C_supl$Condition) <- c("amlodipine-100_rep1", "amlodipine-100_rep2", "control", "control")  # changing the levels name and grouping the controls
-
 
 ### Data Standarization
 
@@ -653,79 +642,51 @@ Fig.4C_supl %>%
 # Note, the position of the significance simbols is in the stat.test DF
 
 # to save plots and data
-# ggsave("Fig.4_supl.png", device = 'png', path = 'output images/')
-# ggsave("Fig.4_supl.svg", device = 'svg', path = 'output images/')
-# write_csv(Fig.4_supl, "output data/Fig.4_supl_data.csv")
+ggsave("Fig.4C_supl.png", device = 'png', path = 'output images/')
+ggsave("Fig.4C_supl.svg", device = 'svg', path = 'output images/')
+write_csv(Fig.4C_supl, "output data/Fig.4C_supl_data.csv")
 ```
 
-## Fig.5 
+
+## Fig.5
+
+```{r, warning=FALSE}
+data_folder <- 'p:/CABD/Lab Manolo Muñoz/Ana Maria Brokate/datos paper Galiciamed/figure-5-clomipramine-adulto-principal/'
+Fig.5 <- process_experiment(data_folder)
+```
+
+
+```{r message=FALSE}
+
+Fig.5 %>% mutate(Sum_IntDen = Sum_IntDen/1e7) %>% 
+  ggplot(aes(x = Condition,y = Sum_IntDen, fill = as.factor(Condition))) + 
+  geom_boxplot(width = 0.5, outlier.shape = NA) +
+  geom_jitter(aes(fill = as.factor(Condition)), size = 1.6, alpha = 0.7, width = 0.15) +
+  scale_y_continuous(breaks=seq(0, 1.45, 0.25)) +
+  labs(x = "Condition", y = "Total Fluorescent Integrated Density (a.u)", title = "Fig.5 -  SMN expression after treatment in adult stage-principal") +
+  theme_bw(base_size = 12) +
+  theme(legend.position = 'none', panel.grid.minor = element_blank(), axis.text.x = element_text(size = 11, face = "italic")) +
+  stat_compare_means(
+    label = "p.signif",
+    method = "t.test",
+    ref.group = "control",
+    label.y = 0.7
+  )
+
+# to save plots and data
+ggsave("Fig.5.png", device = 'png', path = 'output images/')
+ggsave("Fig.5.svg", device = 'svg', path = 'output images/')
+write_csv(Fig.5, "output data/Fig.5_data.csv")
+```
+
+## Fig.5 Suplementary
 
 ```{r, warning=FALSE, fig.width=10}
 # Every command is in a single chunk for easiness
-# data_folder <- 'p:/CABD/Lab Manolo Muñoz/Ana Maria Brokate/datos paper Galiciamed/figl/'
-data_folder <- '/home/ale/pCloudDrive/CABD/Lab Manolo Muñoz/Ana Maria Brokate/datos paper Galiciamed/figure-5-clomipramine-adulto-principal/'
-Fig.5 <- process_experiment(data_folder) %>%
-  mutate(Condition = factor(Condition, levels = c("control", "amlodipine-25", "amlodipine-100"))) # ordered factors
-
-### Data Standarization
-
-standarization_factors_Fig.5 <-
-  Fig.5 %>% filter(Condition == 'control') %>% group_by(Date) %>% summarise(
-    control_mean_Sum_IntDen = mean(Sum_IntDen),
-    control_sd_Sum_IntDen = sd(Sum_IntDen),
-  )
-
-# Adding the Standarization factors to the Fig. dataset using the Date as reference. Afterwards, calculating the Standarized values
-
-Fig.5 <-
-  Fig.5 %>% right_join(standarization_factors_Fig.5, by = "Date") %>%
-  mutate(
-    stand_Sum_IntDen = (Sum_IntDen - control_mean_Sum_IntDen) / control_sd_Sum_IntDen
-    )
-
-### Statistical Test
-
-stat.test_Fig.5 <- Fig.5 %>%
-  filter(Condition != 'control') %>% droplevels() %>% 
-  group_by(Condition, Date) %>%
-  t_test(stand_Sum_IntDen ~ 1, mu = 0,  alternative = "greater") %>% adjust_pvalue(method = "bonferroni") %>% add_significance("p.adj") %>%
-  add_xy_position(x = "Condition") %>%
-  mutate(y.position = 8.2)
-
-# Cohen's d
-
-# Fig.5 %>% group_by(Date) %>% cohens_d(Sum_IntDen ~ Condition, ref.group = 'control')
-
-### Plot
-
-Fig.5 %>%
-  filter(Condition != 'control') %>%
-  ggplot(aes(x = Condition, y = stand_Sum_IntDen, fill = Condition)) +
-  geom_boxplot( outlier.shape = NA, width = 0.5) +
-  geom_point(position = position_jitterdodge(jitter.width = 0.8, dodge.width = 0.5), size =1.2, alpha=0.7) +
-  # geom_jitter(aes(fill = as.factor(Date)), size = 1.6, alpha = 0.7, width = 0.15) +
-  labs(x = "Condition", y = "Relative change in Integrated Density", title = "Treatment with Amlodipine increase the level of SMN.") +
-  theme_bw(base_size = 12) +
-  theme(legend.position = 'none', panel.grid.minor = element_blank(), axis.text.x = element_text(size = 11, face = "italic")) + 
-  stat_pvalue_manual(stat.test_Fig.5, label = "p.adj.signif", x = 'x')
-# Note, the position of the significance symbols is in the stat.test DF
-
-# to save plots and data
-# ggsave("Fig.4.png", device = 'png', path = 'output images/')
-# ggsave("Fig.4.svg", device = 'svg', path = 'output images/')
-# write_csv(Fig.4, "output data/Fig.4_data.csv")
-```
-
-## Fig.4 C Suplementary
-
-```{r, warning=FALSE, fig.width=10}
-# Every command is in a single chunk for easinses
-# data_folder <- 'p:/CABD/Lab Manolo Muñoz/Ana Maria Brokate/datos paper Galiciamed//'
-data_folder <- '/home/ale/pCloudDrive/CABD/Lab Manolo Muñoz/Ana Maria Brokate/datos paper Galiciamed/Figure-4C-amlodipine-supl/'
+data_folder <- 'p:/CABD/Lab Manolo Muñoz/Ana Maria Brokate/datos paper Galiciamed/Figure-5-clomipramine-adulto-supl/'
 Fig.5_supl <- process_experiment(data_folder) %>%
   mutate(Condition = factor(Sample)) # to use the sample repetition as the condition
-levels(Fig.5_supl$Condition) <- c("amlodipine-100_rep1", "amlodipine-100_rep2", "control", "control")  # changing the levels name and grouping the controls
-
+levels(Fig.5_supl$Condition) <- c("clomipramine-100_rep1", "clomipramine-100_rep2", "control", "control")  # changing the levels name and grouping the controls
 
 ### Data Standarization
 
@@ -750,7 +711,7 @@ stat.test_Fig.5_supl <- Fig.5_supl %>%
   group_by(Condition, Date) %>%
   t_test(stand_Sum_IntDen ~ 1, mu = 0, alternative = "greater") %>% adjust_pvalue(method = "bonferroni") %>% add_significance("p.adj") %>%
   add_xy_position(x = "Condition") %>%
-  mutate(y.position = 12.5) 
+  mutate(y.position = 6.2) 
 
 # Cohen's d
 
@@ -764,14 +725,78 @@ Fig.5_supl %>%
   geom_boxplot( outlier.shape = NA, width = 0.5) +
   geom_point(position = position_jitterdodge(jitter.width = 0.8, dodge.width = 0.5), size =1.2, alpha=0.7) +
   # geom_jitter(aes(fill = as.factor(Date)), size = 1.6, alpha = 0.7, width = 0.15) +
-  labs(x = "Condition", y = "Relative change in Integrated Density", title = "Treatment with Amlodipine 100 uM - Suplementary") +
+  labs(x = "Condition", y = "Relative change in Integrated Density", title = "Fig.5 - Suplementary: SMN expression after treatment in adult stage") +
   theme_bw(base_size = 12) +
   theme(legend.position = 'none', panel.grid.minor = element_blank(), axis.text.x = element_text(size = 11, face = "italic")) + 
-  stat_pvalue_manual(stat.test_Fig.5_supl, label = "p.adj.signif", x = 'x')
+  stat_pvalue_man
+ual(stat.test_Fig.5_supl, label = "p.adj.signif", x = 'x')
 # Note, the position of the significance simbols is in the stat.test DF
 
 # to save plots and data
-# ggsave("Fig.4_supl.png", device = 'png', path = 'output images/')
-# ggsave("Fig.4_supl.svg", device = 'svg', path = 'output images/')
-# write_csv(Fig.4_supl, "output data/Fig.4_supl_data.csv")
+ggsave("Fig.5_supl.png", device = 'png', path = 'output images/')
+ggsave("Fig.5_supl.svg", device = 'svg', path = 'output images/')
+write_csv(Fig.5_supl, "output data/Fig.5_supl_data.csv")
 ```
+
+
+
+
+## Fig.6 Suplementary
+
+```{r, warning=FALSE, fig.width=10}
+# Every command is in a single chunk for easiness
+data_folder <- 'p:/CABD/Lab Manolo Muñoz/Ana Maria Brokate/datos paper Galiciamed/figure-6-BN1158-supl/'
+Fig.6_supl <- process_experiment(data_folder) %>%
+  mutate(Condition = factor(Sample)) # to use the sample repetition as the condition
+levels(Fig.6_supl$Condition) <- c("bn-clo100_rep1", "bn-clo100_rep2", "control", "control")  # changing the levels name and grouping the controls
+
+### Data Standarization
+
+standarization_factors_Fig.6_supl <-
+  Fig.6_supl %>% filter(Condition == 'control') %>% group_by(Date) %>% summarise(
+    control_mean_Sum_IntDen = mean(Sum_IntDen),
+    control_sd_Sum_IntDen = sd(Sum_IntDen),
+  )
+
+# Adding the Standarization factors to the Fig. dataset using the Date as reference. Afterwards, calculating the Standarized values
+
+Fig.6_supl <-
+  Fig.6_supl %>% right_join(standarization_factors_Fig.6_supl, by = "Date") %>%
+  mutate(
+    stand_Sum_IntDen = (Sum_IntDen - control_mean_Sum_IntDen) / control_sd_Sum_IntDen
+    )
+
+### Statistical Test
+
+stat.test_Fig.6_supl <- Fig.6_supl %>%
+  filter(Condition != 'control') %>%  droplevels() %>% 
+  group_by(Condition, Date) %>%
+  t_test(stand_Sum_IntDen ~ 1, mu = 0, alternative = "greater") %>% adjust_pvalue(method = "bonferroni") %>% add_significance("p.adj") %>%
+  add_xy_position(x = "Condition") %>%
+  mutate(y.position = 4.5) 
+
+# Cohen's d
+
+# Fig.6_supl %>% group_by(Date) %>% cohens_d(Sum_IntDen ~ Condition, ref.group = 'control')
+
+### Plot
+
+Fig.6_supl %>%
+  filter(Condition != 'control') %>% droplevels() %>% 
+  ggplot(aes(x = Condition, y = stand_Sum_IntDen, fill = Date)) +
+  geom_boxplot( outlier.shape = NA, width = 0.5) +
+  geom_point(position = position_jitterdodge(jitter.width = 0.8, dodge.width = 0.5), size =1.2, alpha=0.7) +
+  # geom_jitter(aes(fill = as.factor(Date)), size = 1.6, alpha = 0.7, width = 0.15) +
+  labs(x = "Condition", y = "Relative change in Integrated Density", title = "Fig.6 - Suplementary: SMN expression en cepa BN1158 after treatment in adult stage") +
+  theme_bw(base_size = 12) +
+  theme(legend.position = 'none', panel.grid.minor = element_blank(), axis.text.x = element_text(size = 11, face = "italic")) + 
+  stat_pvalue_manual(stat.test_Fig.6_supl, label = "p.adj.signif", x = 'x')
+# Note, the position of the significance simbols is in the stat.test DF
+
+# to save plots and data
+ggsave("Fig.6_supl.png", device = 'png', path = 'output images/')
+ggsave("Fig.6_supl.svg", device = 'svg', path = 'output images/')
+write_csv(Fig.6_supl, "output data/Fig.6_supl_data.csv")
+```
+
+
