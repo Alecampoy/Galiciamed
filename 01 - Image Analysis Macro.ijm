@@ -2,48 +2,51 @@
 /* Author: Ale Campoy
  * Microscopy Unit (CABD)
  * Date: 21.09.2020
- * User: Ana Brokate 
+ * User: Ana Brokate - Project Galiciamed
  * 	
- * Description: Measure the amount, size and expresion of the clusters on red channel on a 3D manner
+ * Description: This macro quantifies the expresion of SMN1 in C.elegans confocal images
  * 
- * Input:  .tiff
+ * Exectution: Run the macro when an image of C.elegans SMN1 expresion is open
  * Output: Result table & ROI
  * 
  *///////////////////////////////////////////////////////////////////////////////////////////////
 
-//Borramos todo lo que pueda haber
+// Clean Fiji
 run("Clear Results");
 counts = roiManager("count");
 if(counts !=0) {roiManager("delete");}
 
+// Set metadata and set fiji
 original = getImageID();
 dir = getInfo("image.directory");
 title = getTitle();
 rename("original");
 getDimensions(width, height, channels, slices, frames);
 Stack.setXUnit("nm");
-run("Properties...", "channels="+channels+" slices="+slices+" frames="+frames+" pixel_width=208.7667 pixel_height=208.7667 voxel_depth=1000.0000");
-
+run("Properties...", "channels="+channels+" slices="+slices+" frames="+frames+" pixel_width=208.7667 pixel_height=208.7667 voxel_depth=1000.0000"); // Proper pixel width
 run("Set Measurements...", "area mean standard modal min perimeter shape integrated median display redirect=None decimal=0");
-waitForUser("Dibuja un area que contenga el ROI y pulsa OK. Manten pulsada la tecla Shift para varias zonas");
+
+// Draw the ROI where the measurement is performed
+waitForUser("Draw an Area containing the ROI and press OK");
 setBackgroundColor(0, 0, 0);
 run("Clear Outside", "stack");
 run("Select None");
 
+// Choose the Red channel of interest
 if(channels !=1) {
 run("Split Channels");
 selectWindow("C2-original");
 close();
 selectWindow("C1-original");
 rename("original");}
-
 run("Duplicate...", "title=filtered duplicate channels=1");
 duplicado = getImageID();
 
+// Process
 run("Unsharp Mask...", "radius=2 mask=0.55"); // deberia de tener stack
 run("Gaussian Blur...", "sigma=1");
 
-//hay que ajustar el volumen minimo, preguntar a Ana Maria
+// Threshold of the SNM1 expresion clusters
 run("3D OC Options", "volume surface nb_of_obj._voxels nb_of_surf._voxels integrated_density mean_gray_value std_dev_gray_value median_gray_value minimum_gray_value maximum_gray_value centroid bounding_box show_masked_image_(redirection_requiered) dots_size=5 font_size=10 redirect_to=original");
 run("3D Objects Counter", "threshold=1500 slice=1 min.=3 max.=18874368 statistics"); //cambiar aqui threshold si necesario y poner filtro de voxel size
 wait(50);
