@@ -48,9 +48,10 @@ run("Gaussian Blur...", "sigma=1");
 
 // Threshold of the SNM1 expresion clusters
 run("3D OC Options", "volume surface nb_of_obj._voxels nb_of_surf._voxels integrated_density mean_gray_value std_dev_gray_value median_gray_value minimum_gray_value maximum_gray_value centroid bounding_box show_masked_image_(redirection_requiered) dots_size=5 font_size=10 redirect_to=original");
-run("3D Objects Counter", "threshold=1500 slice=1 min.=3 max.=18874368 statistics"); //cambiar aqui threshold si necesario y poner filtro de voxel size
+run("3D Objects Counter", "threshold=1500 slice=1 min.=3 max.=18874368 statistics"); // Intensity Threshold and Size Filter
 wait(50);
 
+// Save the results
 selectWindow("Masked image for filtered redirect to original");
 saveAs("Tiff", dir+"Mascara de"+title+".tif");
 getDimensions(width, height, channels, slices, frames);
@@ -60,10 +61,10 @@ for (i=1; i<slices+1; i++) {
 	Stack.setSlice(i);
 	run("Create Selection");
 	if (selectionType !=-1) {
-	roiManager("Add"); //se añade el roi del disco, se renombra y mide para tener el area
+	roiManager("Add"); 
 	};
 };
-roiManager("save", dir+"Rois_to_check_"+title+".zip"); //salvamos el ROI 
+roiManager("save", dir+"Rois_to_check_"+title+".zip"); 
 	
 selectWindow("Results");
 saveAs("Results", dir+"results_of_"+title+".xls");
