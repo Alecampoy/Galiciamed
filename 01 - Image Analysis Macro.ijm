@@ -43,8 +43,9 @@ run("Duplicate...", "title=filtered duplicate channels=1");
 duplicado = getImageID();
 
 // Process
-run("Unsharp Mask...", "radius=2 mask=0.55"); // deberia de tener stack
-run("Gaussian Blur...", "sigma=1");
+// No process is performed
+// run("Unsharp Mask...", "radius=2 mask=0.55 stack"); 
+// run("Gaussian Blur...", "sigma=1 stack");
 
 // Threshold of the SNM1 expresion clusters
 run("3D OC Options", "volume surface nb_of_obj._voxels nb_of_surf._voxels integrated_density mean_gray_value std_dev_gray_value median_gray_value minimum_gray_value maximum_gray_value centroid bounding_box show_masked_image_(redirection_requiered) dots_size=5 font_size=10 redirect_to=original");
@@ -55,8 +56,9 @@ wait(50);
 selectWindow("Masked image for filtered redirect to original");
 saveAs("Tiff", dir+"Mascara de"+title+".tif");
 getDimensions(width, height, channels, slices, frames);
-setThreshold(5, 65535);
+setThreshold(5, 65535); // thresold just for the mask
 run("Convert to Mask", "background=Dark");
+// Save the rois for easy slicing when checking the results
 for (i=1; i<slices+1; i++) {
 	Stack.setSlice(i);
 	run("Create Selection");
@@ -65,9 +67,10 @@ for (i=1; i<slices+1; i++) {
 	};
 };
 roiManager("save", dir+"Rois_to_check_"+title+".zip"); 
-	
+// Save result table	
 selectWindow("Results");
 saveAs("Results", dir+"results_of_"+title+".xls");
+
 run("Close");
 close("*");
 
