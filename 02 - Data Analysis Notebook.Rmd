@@ -113,7 +113,7 @@ process_experiment <- function(data_folder){
 
 ## Check that every folder has the proper name structure
 ```{r}
-every_file <- dir('p:/CABD/Lab Manolo Muñoz/Ana Maria Brokate/datos paper Galiciamed/', recursive = TRUE, include.dirs = FALSE)
+every_file <- dir('data/', recursive = TRUE, include.dirs = FALSE)
 every_file[!grepl("\\s-\\s", every_file)]
 ```
 
@@ -123,7 +123,7 @@ every_file[!grepl("\\s-\\s", every_file)]
 ## Fig.2
 
 ```{r, warning=FALSE}
-data_folder <- 'p:/CABD/Lab Manolo Muñoz/Ana Maria Brokate/datos paper Galiciamed/figura-2-smn-principal/'
+data_folder <- 'data/figura-2-smn-principal/'
 Fig.2 <- process_experiment(data_folder)
 ```
 
@@ -154,7 +154,7 @@ write_csv(Fig.2, "output data/Fig.2_data.csv")
 ## Fig.3
 
 ```{r, warning=FALSE}
-data_folder <- 'p:/CABD/Lab Manolo Muñoz/Ana Maria Brokate/datos paper Galiciamed/figure-3-11genes-principal/'
+data_folder <- 'data/figure-3-11genes-principal/'
 Fig.3 <- process_experiment(data_folder)
 ```
 
@@ -231,7 +231,7 @@ write_csv(Fig.3, "output data/Fig.3_data.csv")
 ## Fig.3 Suplementary
 
 ```{r, warning=FALSE}
-data_folder <- 'p:/CABD/Lab Manolo Muñoz/Ana Maria Brokate/datos paper Galiciamed/Figure-3-11genes-supl/'
+data_folder <- 'data/Figure-3-11genes-supl/'
 Fig.3_supl <- process_experiment(data_folder)
 ```
 
@@ -300,7 +300,7 @@ write_csv(Fig.3_supl, "output data/Fig.3_supl_data.csv")
 
 ```{r, warning=FALSE, fig.width=10}
 # Every command is in a single chunk for easiness
-data_folder <- 'p:/CABD/Lab Manolo Muñoz/Ana Maria Brokate/datos paper Galiciamed/figure-4A-clomipramine-gradiente-principal/'
+data_folder <- 'data/figure-4A-clomipramine-gradiente-principal/'
 Fig.4A <- process_experiment(data_folder) %>%
   mutate(Condition = factor(Condition, levels = c("control", "clomipramine-30", "clomipramine-60", "clomipramine-100", "clomipramine-120", "clomipramine-150",  "clomipramine-300"))) # ordered factors
 
@@ -359,7 +359,7 @@ write_csv(Fig.4A, "output data/Fig.4A_data.csv")
 
 ```{r, warning=FALSE, fig.width=10}
 # Every command is in a single chunk for easiness
-data_folder <- 'p:/CABD/Lab Manolo Muñoz/Ana Maria Brokate/datos paper Galiciamed/Figure-4A-clomipramine-supl/'
+data_folder <- 'data/Figure-4A-clomipramine-supl/'
 Fig.4A_supl <- process_experiment(data_folder) %>%
   mutate(Condition = factor(Sample)) # to use the sample repetition as the condition
 levels(Fig.4A_supl$Condition) <- c("clomipramine-100_rep1", "clomipramine-100_rep2", "clomipramine-100_rep3",
@@ -419,7 +419,7 @@ write_csv(Fig.4A_supl, "output data/Fig.4A_supl_data.csv")
 
 ```{r, warning=FALSE, fig.width=10}
 # Every command is in a single chunk for easiness
-data_folder <- 'p:/CABD/Lab Manolo Muñoz/Ana Maria Brokate/datos paper Galiciamed/figure-4B-desipramine-gradiente-principal/'
+data_folder <- 'data/figure-4B-desipramine-gradiente-principal/'
 Fig.4B <- process_experiment(data_folder) %>%
   mutate(Condition = factor(Condition, levels = c("control", "desipramine-15",  "desipramine-50",  "desipramine-250", "desipramine-400", "desipramine-500"))) # ordered factors
 
@@ -477,7 +477,7 @@ write_csv(Fig.4B, "output data/Fig.4B_data.csv")
 
 ```{r, warning=FALSE, fig.width=10}
 # Every command is in a single chunk for easinses
-data_folder <- 'p:/CABD/Lab Manolo Muñoz/Ana Maria Brokate/datos paper Galiciamed/Figure-4B-desipramine-supl/'
+data_folder <- 'data/Figure-4B-desipramine-supl/'
 Fig.4B_supl <- process_experiment(data_folder) %>%
   mutate(Condition = factor(Sample)) # to use the sample repetition as the condition
 levels(Fig.4B_supl$Condition) <- c("control", "control", "desipramine-400", "desipramine-500_rep1", "desipramine-500_rep2" )  # changing the levels name and grouping the controls
@@ -536,7 +536,7 @@ write_csv(Fig.4B_supl, "output data/Fig.4B_supl_data.csv")
 
 ```{r, warning=FALSE, fig.width=10}
 # Every command is in a single chunk for easinses
-data_folder <- 'p:/CABD/Lab Manolo Muñoz/Ana Maria Brokate/datos paper Galiciamed/figure-4C-amlodipine-gradiente-principal/'
+data_folder <- 'data/figure-4C-amlodipine-gradiente-principal/'
 Fig.4C <- process_experiment(data_folder) %>%
   mutate(Condition = factor(Condition, levels = c("control", "amlodipine-25", "amlodipine-100"))) # ordered factors
 
@@ -593,7 +593,7 @@ write_csv(Fig.4C, "output data/Fig.4C_data.csv")
 
 ```{r, warning=FALSE, fig.width=10}
 # Every command is in a single chunk for easiness
-data_folder <- 'p:/CABD/Lab Manolo Muñoz/Ana Maria Brokate/datos paper Galiciamed/Figure-4C-amlodipine-supl/'
+data_folder <- 'data/Figure-4C-amlodipine-supl/'
 Fig.4C_supl <- process_experiment(data_folder) %>%
   mutate(Condition = factor(Sample)) # to use the sample repetition as the condition
 levels(Fig.4C_supl$Condition) <- c("amlodipine-100_rep1", "amlodipine-100_rep2", "control", "control")  # changing the levels name and grouping the controls
@@ -651,7 +651,7 @@ write_csv(Fig.4C_supl, "output data/Fig.4C_supl_data.csv")
 ## Fig.5
 
 ```{r, warning=FALSE}
-data_folder <- 'p:/CABD/Lab Manolo Muñoz/Ana Maria Brokate/datos paper Galiciamed/figure-5-clomipramine-adulto-principal/'
+data_folder <- 'data/figure-5-clomipramine-adulto-principal/'
 Fig.5 <- process_experiment(data_folder)
 ```
 
@@ -683,7 +683,7 @@ write_csv(Fig.5, "output data/Fig.5_data.csv")
 
 ```{r, warning=FALSE, fig.width=10}
 # Every command is in a single chunk for easiness
-data_folder <- 'p:/CABD/Lab Manolo Muñoz/Ana Maria Brokate/datos paper Galiciamed/Figure-5-clomipramine-adulto-supl/'
+data_folder <- 'data/Figure-5-clomipramine-adulto-supl/'
 Fig.5_supl <- process_experiment(data_folder) %>%
   mutate(Condition = factor(Sample)) # to use the sample repetition as the condition
 levels(Fig.5_supl$Condition) <- c("clomipramine-100_rep1", "clomipramine-100_rep2", "control", "control")  # changing the levels name and grouping the controls
@@ -744,7 +744,7 @@ write_csv(Fig.5_supl, "output data/Fig.5_supl_data.csv")
 
 ```{r, warning=FALSE, fig.width=10}
 # Every command is in a single chunk for easiness
-data_folder <- 'p:/CABD/Lab Manolo Muñoz/Ana Maria Brokate/datos paper Galiciamed/figure-6-BN1158-supl/'
+data_folder <- 'data/figure-6-BN1158-supl/'
 Fig.6_supl <- process_experiment(data_folder) %>%
   mutate(Condition = factor(Sample)) # to use the sample repetition as the condition
 levels(Fig.6_supl$Condition) <- c("bn-clo100_rep1", "bn-clo100_rep2", "control", "control")  # changing the levels name and grouping the controls
